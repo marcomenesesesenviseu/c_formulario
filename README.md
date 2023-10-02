@@ -12,8 +12,9 @@ Esta ainda é uma versão de teste, com algumas funcionalidades limitadas.
 
 # Outros módulos necessários
 
-JQuery
-https://jquery.com/download/
+JQuery     https://jquery.com/download/
+toast      https://github.com/AucT/b5toast
+bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/
 
 # Limitações desta versão
 
@@ -40,10 +41,26 @@ Linha para associar validações ao formulário:
       - Exemplo: "«txtPalavraPasse.length» < 10"
   - texto de erro a apresentar
     - para que o texto do erro apareça a condição tem de se verificar, ou seja, ser verdadeira
+    - deve criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer (passo a eliminar ma próxima versão)
+      - id deve começar por erro_<nome_do_objeto>
+      - devem ser-lhe atribuídas as classes
+        - esconde (esconde o objeto)
+        - erro_formulario (formatação onde aparece o erro)
+      - Exemplo:
+        <input id="txtUtilizador" type="text" />
+        <div class="esconde erro_formulario" id="erro_txtUtilizador"></div>
 
 # Exemplo completo
-Formulário:
- «html»
-- Para o objeto <input id="txtUtilizador" /> 
-- Adiciona_Validacoes([<id_do_objeto_html>,"«» == ''", "* Obrigatório"])
-- <variável_para_o_formulário>.Adiciona_Validacoes([<id_do_objeto_html>,"«txtServidor» == ''", "* Obrigatório"]);
+Formulário no ficheiro html:
+  <form id="frmLogin">
+    <input id="txtUtilizador" type="text" />
+    <div class="esconde erro_formulario" id="erro_txtUtilizador"></div>
+    <input id="txtPalavraPasse" type="password" />
+    <div class="esconde erro_formulario" id="erro_txtPalavraPasse"></div>
+    <button id="butValidar" type="button">Validar</button>
+  </form>
+
+Associação do formulário html ao módulo c_formulário no ficheiro javascript:
+  const f_Login = new formulario("frmLogin");
+  f_Login.Adiciona_Validacoes(["txtUtilizador","«txtUtilizador» == ''", "* Obrigatório"]);
+  f_Login.Adiciona_Validacoes(["txtPalavraPasse","«txtPalavraPasse» < 6", "* A palavra-passe tem de ter pelo menos 10 digitos"]);
