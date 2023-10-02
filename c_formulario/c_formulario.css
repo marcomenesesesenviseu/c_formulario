@@ -1,0 +1,8 @@
+.erro_formulario {
+    margin-top: 3px;
+    color: red;
+    background-color: lightgray;
+    font-size: .70em;
+    font-weight: bold;
+    width: 100%;
+}
