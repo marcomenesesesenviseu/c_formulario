@@ -17,4 +17,10 @@ https://jquery.com/download/
 
 # Limitações desta versão
 
-Só consegue fazer testes 
+- Só consegue fazer testes ao conteúdo (val) e ao tamanho (length);
+- Só permite ter uma verificação por validação.
+
+# Associar formulário
+
+Linha para criar a associação do formulário:
+const <variável_para_o_formulário> = new formulario(<id_do_formulário>);
