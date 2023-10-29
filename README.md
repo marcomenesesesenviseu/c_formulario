@@ -1,5 +1,5 @@
 # c_formulario
-Módulo JavaScript para criar formulários com validação dinâmica.
+Módulo JavaScript para criar formulários com validação dinâmica. <br>
 Última versão: 1.01
 
 3 ficheiros necessários
@@ -7,16 +7,16 @@ Módulo JavaScript para criar formulários com validação dinâmica.
 - c_formulario.json
 - c_formulario.js
 
-Desenvolvido para ser código aberto por forma a poderem acresentar ou alterar funcionalidades. (UPDATE)
-Ainda estou a trabalhar para melhorar o código.
-Esta já é uma versão funcional, ainda com funcionalidades a serem preparadas. (UPDATE)
-Caso detetem algum problema, enviem email para emes3soft@gmail.com com a descrição o mais detalhada possível.
+Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. **(UPDATE)** <br>
+Ainda estou a trabalhar para melhorar o código. <br>
+Esta já é uma versão funcional, ainda com funcionalidades a serem preparadas. **(UPDATE)** <br>
+Caso detetem algum problema, enviem email para emes3soft@gmail.com com a descrição o mais detalhada possível. <br>
 
 # Outros módulos necessários
 
 JQuery     https://jquery.com/download/ <br>
 toast      https://github.com/AucT/b5toast <br>
-bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/
+bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/ <br>
 
 # Limitações desta versão
 
@@ -72,7 +72,7 @@ Linha para associar validações ao formulário:
 
 # Lógica das validações (NEW)
 
-Quando existe mais de que uma validação de um mesmo objeto (referenciado pelo seu id), estas são validadas pela ordem inserida.
+Quando existe mais de que uma validação de um mesmo objeto (referenciado pelo seu id), estas são validadas pela ordem inserida. <br>
 Imagine-se 3 validações para um objeto:
   - se a primeira der erro, as outras duas seguintes são ignoradas (não as valida), aparecendo o texto do erro da primeira validação;
   - só a segunda dá erro, a terceira é ignorada, aparecendo o texto do erro da segunda validação;
