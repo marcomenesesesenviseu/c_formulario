@@ -1,3 +1,9 @@
+/***********************************************************/
+/* C_FORMULÁRIO - Validador de formulários                 */
+/* Desenvolvido por Marco Meneses (EMES3SOFT)              */
+/* Versão 1.01                                             */
+/***********************************************************/
+
 if (window.jQuery) {  
 } else {
     console.error("O jquery ainda não foi carregado.");
@@ -21,11 +27,12 @@ class mensagens {
 }
 
 class formulario_validacoes {
-    constructor(id, comparacao, texto_erro){
+    constructor(id, comparacao, texto_erro, mostra_resultado=false) {
         this.num = this.length > 0 ? this[this.length - 1].num++ : 1;
         this.id = id;
         this.comparacao = comparacao;
         this.texto_erro = texto_erro;
+        this.mostra_resultado = mostra_resultado;
     }
 }
 
@@ -38,11 +45,12 @@ class formulario_erros {
 }
 
 class formulario_objetos {
-    constructor(num, id, valor, escondido){
+    constructor(num, id, valor, escondido, testado = false){
         this.num = num;
         this.id = id;
         this.valor = valor;
         this.escondido = escondido;
+        this.testado = testado
     }
 }
 
@@ -50,6 +58,16 @@ class limitadores {
     static get inicial() { return '«' };
     static get final() { return '»' };
     static get separador() { return "." };
+    static get includes_inicial() { return "('" };
+    static get includes_final() { return "')" };
+}
+
+class constantes {
+    static get classe_esconde() { return "esconde_c_formulario" };
+    static get classe_geral_valido() { return "is-valid" };
+    static get classe_geral_invalido() { return "is-invalid" };
+    static get classe_obj_valido() { return "objeto_valido_c_formulario" };
+    static get classe_obj_invalido() { return "objeto_invalido_c_formulario" };
 }
 
 class formulario {
@@ -165,6 +183,11 @@ class formulario {
         else
             b5toast.show('danger',"Variavel não encontrada: " + variavel_mensagem, 'ERRO', this.mensagens.tempo_de_espera);
     }
+
+    // Transforma um id em objeto jQUERY
+    #Transforma_id_em_objeto(num_ou_nome_objeto = undefined) {
+        return $("#" + num_ou_nome_objeto)
+    }
     
     // Adiciona erros ao vetor de erros
     Adiciona_Erros(dados = []) {
@@ -203,9 +226,9 @@ class formulario {
                 if (this.formulario.elementos[i].id !== "") {
                     let dados=[];
                     if (this.formulario.elementos[i].id.includes("chk"))
-                        dados = [valor_id, this.formulario.elementos[i].id, this.formulario.elementos[i].checked ? 1 : 0, $(this.formulario.elementos[i]).hasClass("esconde")];
+                        dados = [valor_id, this.formulario.elementos[i].id, this.formulario.elementos[i].checked ? 1 : 0, $(this.formulario.elementos[i]).hasClass(constantes.classe_esconde)];
                     else
-                        dados = [valor_id, this.formulario.elementos[i].id, this.formulario.elementos[i].value, $(this.formulario.elementos[i]).hasClass("esconde")];
+                        dados = [valor_id, this.formulario.elementos[i].id, this.formulario.elementos[i].value, $(this.formulario.elementos[i]).hasClass(constantes.classe_esconde)];
                     this.formulario.objetos.push(new formulario_objetos(...dados));
 
                     this.formulario.vetores.num.push(dados[0]);
@@ -225,12 +248,17 @@ class formulario {
                 return false;
             }
             else if (typeof dados[1] !== 'string') {
-                console.log("TESTA_ENTRADA_DADOS: O objeto não é texto: " + dados[1]);
+                console.log("TESTA_ENTRADA_DADOS: O objeto não é texto. " + dados[1]);
                 return false;
             }
             else if (typeof dados[2] !== 'string') {
-                console.log("TESTA_ENTRADA_DADOS: O objeto não é texto para o erro." + dados[2]);
+                console.log("TESTA_ENTRADA_DADOS: O objeto não é texto para o erro."  + dados[2]);
                 return false;
+            }
+            else if (dados.length == 4)
+                if (typeof dados[3] !== 'boolean') {
+                    console.log("TESTA_ENTRADA_DADOS: O objeto não é um valor booleano. " + dados[3]);
+                    return false;
             }
 
             return true;
@@ -244,15 +272,14 @@ class formulario {
     // id ou num do objeto, comparação, string com a mensagem de erro
     Adiciona_Validacoes(dados = []) {
         if (this.erros.length === 0) {
-            if (dados.length == 3) {
+            if ([3, 4].includes(dados.length)) {
                 if (this.#Testa_Entrada_Dados(dados)) {
                     this.validacoes.push(new formulario_validacoes(...dados));
                     return true;
                 }
             }
-            else
-                console.log("ADICIONA_VALIDACOES: Deve introduzir 3 dados como vetor ([id ou formulario-numobj do objeto, string de comparação, string com a mensagem de erro]): " + JSON.stringify(dados));
-
+                
+            console.log("ADICIONA_VALIDACOES: Deve introduzir 3 ou 4 dados como vetor ([id ou formulario-numobj do objeto, string de comparação, string com a mensagem de erro]): \n" + dados.length + " -- " + JSON.stringify(dados));
             return false;
         }
         else
@@ -264,37 +291,108 @@ class formulario {
         return vetor.indexOf(valor);
     }
 
-    //Verifica se o objeto existe no vetor dos objetos do formulário
-    #Verifica_Elemento_Existe(num_ou_nome_objeto = undefined) {
-        let encontrou_num =this.#Existe_Valor_Vetor(num_ou_nome_objeto,this.formulario.vetores.num);
-        let encontrou_id = this.#Existe_Valor_Vetor(num_ou_nome_objeto,this.formulario.vetores.id);
+    // Devolve a valor da posição se o elemento existe, caso contrário devolve -1
+    #Posicao_Elemento_Objetos_Formulario(num_ou_nome_objeto = undefined) {
+        let encontrou_pos = -1;
 
-        return (encontrou_num != -1 ? encontrou_num : encontrou_id);
+        if (num_ou_nome_objeto.includes("?")) {
+            encontrou_pos = this.formulario.vetores.id.filter(str => str.includes(num_ou_nome_objeto.replace("?",""))).length - 1;
+            if (encontrou_pos > -1) {
+                // $.each(this.formulario.vetores.id, function(index) { if (this.includes(num_ou_nome_objeto.replace("?",""))) { encontrou_pos = index; return false;}});
+                encontrou_pos = this.#Existe_Valor_Vetor(this.formulario.vetores.id.filter(str => str.includes(num_ou_nome_objeto.replace("?","")))[0],this.formulario.vetores.id);
+            }
+            // alert(this.formulario.vetores.id.filter(str => str.includes(num_ou_nome_objeto.replace("?","")))[0]);
+            // alert(`Objeto: ${num_ou_nome_objeto}\nNº de objetos encontrados: ${num_elementos}\nPosição no array: ${encontrou_pos}`)
+        }
+        else {
+            encontrou_pos = this.#Existe_Valor_Vetor(num_ou_nome_objeto,this.formulario.vetores.num);
+            if (encontrou_pos == -1) encontrou_pos = this.#Existe_Valor_Vetor(num_ou_nome_objeto,this.formulario.vetores.id);
+        }
+        
+        return encontrou_pos;
     }
 
-    #ObterPosicaoCarater(texto = nothing, texto_a_procurar = nothing, posicao_inicial = 0) {
-        if (texto == nothing) {
-            this.#mostra_mensagem_c_formulario("formularios",20);
-            return -2;
+    // Verifica se o objeto existe no vetor dos objetos do formulário
+    #Verifica_Elemento_Existe(num_ou_nome_objeto = undefined) {
+        if (num_ou_nome_objeto === undefined) {
+            console.error(`VERIFICA_ELEMENTO_EXISTE: = O ID do objeto ${num_ou_nome_objeto} é indefinido!`);
+            return -1;
         }
-        else if (texto_a_procurar == nothing) {
-            mostra_mensagem_toast("formularios",21);
-            return -2;
+        else if (typeof num_ou_nome_objeto !== 'int' && typeof num_ou_nome_objeto !== 'string'){
+            console.error(`VERIFICA_ELEMENTO_EXISTE: O número ou o id do objeto ${num_ou_nome_objeto} do tipo errado!`);
+            return -1;
         }
-        else if (typeof texto != "string") {
-            mostra_mensagem_toast("formularios",22);
-            return -3;
+
+        let devolver = this.#Posicao_Elemento_Objetos_Formulario(num_ou_nome_objeto);
+
+        if (devolver == -1){
+            console.error(`VERIFICA_ELEMENTO_EXISTE: O objeto ${num_ou_nome_objeto} não existe no formulário!`);
+            return -1;
         }
-        else if (typeof texto_a_procurar != "string") {
-            mostra_mensagem_toast("formularios",23);
-            return -3;
+
+        return devolver;
+    }
+
+    //Verifica se o objeto existe no vetor dos objetos do formulário
+    #Verifica_Elemento_Validacao_Existe(num_ou_nome_objeto = undefined) {
+        let vetor_encontrou_pos_validacoes = [];
+        
+        if (this.validacoes.length ==0) {
+            console.error(`VERIFICA_ELEMENTO_VALIDACAO_EXISTE: Não existem validações para testar!`);
+            return -1;
         }
-        else if (typeof posicao_inicial != "int") {
-            mostra_mensagem_toast("formularios",24);
-            return -3;
+
+        for (let i = 0; i < this.validacoes.length; ++i)
+            if (num_ou_nome_objeto != undefined)
+                if ($(this).id == num_ou_nome_objeto) vetor_encontrou_pos_validacoes.push(i); else {}
+            else
+                vetor_encontrou_pos_validacoes.push(i);
+
+        if (vetor_encontrou_pos_validacoes.length == 0) {
+            console.error(`VERIFICA_ELEMENTO_VALIDACAO_EXISTE: O objeto ${num_ou_nome_objeto} não existe nas validações!`);
+            return -1;
         }
-        else
-            return texto.indexOf(texto_a_procurar,posicao_inicial);
+
+        return vetor_encontrou_pos_validacoes;
+    }
+
+    // #ObterPosicaoCarater(texto = nothing, texto_a_procurar = nothing, posicao_inicial = 0) {
+    //     if (texto == nothing) {
+    //         this.#mostra_mensagem_c_formulario("formularios",20);
+    //         return -2;
+    //     }
+    //     else if (texto_a_procurar == nothing) {
+    //         mostra_mensagem_toast("formularios",21);
+    //         return -2;
+    //     }
+    //     else if (typeof texto != "string") {
+    //         mostra_mensagem_toast("formularios",22);
+    //         return -3;
+    //     }
+    //     else if (typeof texto_a_procurar != "string") {
+    //         mostra_mensagem_toast("formularios",23);
+    //         return -3;
+    //     }
+    //     else if (typeof posicao_inicial != "int") {
+    //         mostra_mensagem_toast("formularios",24);
+    //         return -3;
+    //     }
+    //     else
+    //         return texto.indexOf(texto_a_procurar,posicao_inicial);
+    // }
+
+    #Devolve_texto_entre_limitadores(texto, limitador_inicial, limitador_final)
+    {
+        if (!texto.includes(limitador_inicial) || !texto.includes(limitador_final)) {
+            console.error(`DEVOLVE_TEXTO_ENTRE_LIMITADORES: O objeto ${num_ou_nome_objeto} não contém os limitadores « ou »!`);
+            return -1;
+        }
+        else {
+            let pos_inicio = texto.indexOf(limitador_inicial) + limitador_inicial.length;
+            let pos_final = texto.indexOf(limitador_final, pos_inicio);
+
+            return texto.substring(pos_inicio, pos_final)
+        }
     }
 
     // Elabora o texto final de comparação com a substituição dos objetos pelos seus valores
@@ -302,7 +400,7 @@ class formulario {
         let txtstr = texto_comparacao;
         let compara_objeto = [];
         let inicio=0;
-
+        
         while (txtstr.indexOf(limitadores.inicial, inicio) != -1) {
             let posicoes = [0,0];
 
@@ -320,9 +418,46 @@ class formulario {
             else
                 str_objeto_partes.push(str_objeto.replace(limitadores.inicial,"").replace(limitadores.final,""));
 
-            let str_objeto_valor = (str_objeto_partes.length == 1) ? $("#" + str_objeto_partes[0]).val() : ((str_objeto_partes[1] == "length") ? $("#" + str_objeto_partes[0]).val().length : "ERRO DE PROPRIEDADE");
+            //alert("texto: " + txtstr + " -- strobjetos: " + JSON.stringify(str_objeto_partes));
+            let str_objeto_valor = undefined;
 
-            if (typeof str_objeto_valor === 'string')
+            str_objeto_partes[1] = str_objeto_partes[1].toLowerCase();
+
+            if (str_objeto_partes.length == 1 || str_objeto_partes[1] == "val" || str_objeto_partes[1] == "value")
+                str_objeto_valor = $("#" + str_objeto_partes[0]).val();
+            else if (str_objeto_partes[1] == "length" || str_objeto_partes[1] == "len")
+                if (str_objeto_partes[0].includes("?")) {
+                    str_objeto_partes[0] = str_objeto_partes[0].replace("?","")
+                    str_objeto_valor = $("input[name*='" + str_objeto_partes[0] + "']:checked").length;
+                }
+                else
+                    str_objeto_valor = $("#" + str_objeto_partes[0]).val().length;
+            else if (str_objeto_partes[1].toLowerCase().includes("isnumeric"))
+                str_objeto_valor = !$.isNumeric($("#" + str_objeto_partes[0]).val());
+            else if (str_objeto_partes[1].toLowerCase().includes("includes")) {
+                if (str_objeto_partes[1].includes(limitadores.includes_inicial) && str_objeto_partes[1].includes(limitadores.includes_final)){
+                    str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.includes_inicial,limitadores.includes_final);
+                    str_objeto_valor =  $("#" + str_objeto_partes[0]).val().includes(str_objeto_valor);
+                }
+                else 
+                    str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INCLUDES"
+            }
+            else if (str_objeto_partes[1].toLowerCase().includes("indexof")) {
+                if (str_objeto_partes[1].includes(limitadores.includes_inicial) && str_objeto_partes[1].includes(limitadores.includes_final)){
+                    str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.includes_inicial,limitadores.includes_final);
+                    str_objeto_valor =  $("#" + str_objeto_partes[0]).val().indexOf(str_objeto_valor);
+                    //alert(`#Texto_Final\nObjecto: ${str_objeto_partes[0]}\nValor a devolver: ${str_objeto_valor}`);
+                }
+                else 
+                    str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INDEXOF"
+            }
+            else
+                str_objeto_valor = "ERRO DE PROPRIEDADE"
+
+
+            // str_objeto_valor = (str_objeto_partes.length == 1) ? $("#" + str_objeto_partes[0]).val() : ((str_objeto_partes[1] == "length") ? $("#" + str_objeto_partes[0]).val().length : "ERRO DE PROPRIEDADE");
+
+            if ((typeof str_objeto_valor).toLowerCase() === 'string')
                 str_objeto_valor = "'" + str_objeto_valor + "'"
 
             compara_objeto.push(new comparacoes(str_objeto, str_objeto_partes[0], str_objeto_partes[1], str_objeto_valor));
@@ -335,77 +470,123 @@ class formulario {
         return txtstr;
     };
 
-    // Testa todas as validações existentes na lista de validações
-    Testa_Validacoes(num_ou_nome_objeto = undefined, coloca_focus_erro = true) {
-        this.#RecolherElementos();
+    #Testes_Iniciais(num_ou_nome_objeto = undefined) {
+        if (this.erros.length !== 0) {
+            console.log(`TESTES_INICIAIS: O objeto ${this.formulario} definido não é um formulário!`);    
+            return false;
+        }
 
-        if (this.erros.length === 0) {
-            if (this.validacoes.length == 0) {
-                console.log("TESTA_VALIDACOES: Não existem validações para o formulário!");
+        if (typeof num_ou_nome_objeto === 'int' || typeof num_ou_nome_objeto === 'string') {
+            console.log(`TESTES_INICIAIS: O objeto ${num_ou_nome_objeto} definido não é do tipo correcto (int ou string)!`);
+            return false;
+        }
+
+        if (num_ou_nome_objeto != undefined) {
+            if (this.#Verifica_Elemento_Existe(num_ou_nome_objeto) == -1) {
+                console.log(`TESTES_INICIAIS: O objeto ${num_ou_nome_objeto} definido não existe no formulário!`);
                 return false;
             }
-            
-            if (num_ou_nome_objeto !== undefined) {
-                if (typeof num_ou_nome_objeto === 'int' || typeof num_ou_nome_objeto === 'string') {
-                    let num_obj = this.#Verifica_Elemento_Existe(num_ou_nome_objeto);
-                    if (num_obj != -1) {
 
-                    }
-                    else {
-                        console.error("TESTA_VALIDACOES: (" + num_ou_nome_objeto + ") - O objeto não existe no formulário!");
-                        return false;
-                    }
-                }
-                else {
-                    console.error("TESTA_VALIDACOES: (" + num_ou_nome_objeto + ") - O número ou o id do objeto do tipo errado!");
-                    return false;
-                }
-            }
-            else {
-                let existe_erro = false;
-
-                for (let j=0; j < this.formulario.objetos.length; j++) {
-                    
-                    for (let i = 0; i < this.validacoes.length; i++) {
-                        
-                        num_ou_nome_objeto = this.formulario.objetos[j].id;
-
-                        if (this.validacoes[i].id == num_ou_nome_objeto)
-                        {
-                            // comparações
-                            let txtcomparacao = this.#Texto_Final(this.validacoes[i].comparacao);
-                            if (txtcomparacao == "") {
-                                console.log("TESTA_VALIDACOES: (" + num_ou_nome_objeto + ") - Expressão de comparação vazia: " + txtcomparacao);
-                                continue;
-                            }
-                            
-                            let resultado = -1;
-                            try {
-                                resultado = eval?.(txtcomparacao);
-                            } catch (e) {
-
-                            }
-
-                            if (typeof resultado != "boolean") {
-                                console.error("TESTA_VALIDACOES: (" + num_ou_nome_objeto + ") - Erro ao executar a expressão: " + txtcomparacao);
-                                continue;
-                            }
-                            
-                            this.Validar_Caixa_Erro(this.validacoes[i].id, resultado, coloca_focus_erro);
-
-                            if (!existe_erro && resultado) {
-                                existe_erro = true;
-                                coloca_focus_erro = false;
-                            }
-                        }
-                    }
-                }
-
-                return existe_erro;
+            if (this.#Transforma_id_em_objeto(num_ou_nome_objeto).hasClass("is-invalid")) {
+                console.log(`TESTES_INICIAIS: O objeto ${num_ou_nome_objeto} já está validado com erro!`);
+                return false;
             }
         }
-        else
-            console.log("TESTA_VALIDACOES: O objeto definido não é um formulário");    
+
+        return true;
+    }
+
+    // Colocar o estado da caixa segundo o valor_erro (verdadeiro ou falso)
+    #Colocar_Estado_Caixa (pos_validacao_com_erro = undefined, valor_erro = undefined, colocar_focus_no_erro = true) {
+        // let id_objeto =  this.validacoes[pos_validacao_com_erro].id.includes("?") ? this.formulario.vetores.id.filter(str => str.includes(this.validacoes[pos_validacao_com_erro].id.replace("?","")))[0] : this.validacoes[pos_validacao_com_erro].id;
+        let id_objeto =  this.validacoes[pos_validacao_com_erro].id.includes("?") ? this.validacoes[pos_validacao_com_erro].id.replace("?","") : this.validacoes[pos_validacao_com_erro].id;
+        let objeto = "#" + id_objeto;
+        let objeto_erro = "#erro_" + id_objeto;
+
+        // alert(`Objeto: ${objeto}\nObjeto erro: ${objeto_erro}`);
+        let classe_erro = constantes.classe_geral_invalido;
+        let classe_valido = constantes.classe_geral_valido;
+
+        if (!$(objeto).is("input")) {
+            classe_erro = constantes.classe_obj_invalido;
+            classe_valido = constantes.classe_obj_valido;
+        }
+
+        if (!valor_erro) {
+            $(objeto).removeClass(classe_erro);
+            $(objeto).addClass(classe_valido);
+            if ($(objeto_erro) !== undefined && !$(objeto_erro).hasClass(constantes.classe_esconde)) 
+                $(objeto_erro).addClass(constantes.classe_esconde);
+        }
+        else {
+            $(objeto).removeClass(classe_valido);
+            $(objeto).addClass(classe_erro);
+            if ($(objeto_erro) !== undefined) {
+                $(objeto_erro).removeClass(constantes.classe_esconde);
+                $(objeto_erro).html(this.validacoes[pos_validacao_com_erro].texto_erro);
+                if (colocar_focus_no_erro) $(objeto).focus();
+            }
+            else {
+                console.log(`VALIDAR_CAIXA_ERRO: O objeto ${objeto} não tem objeto de erro ${objeto_erro}`);
+            }
+        }
+    }
+
+    // Testa todas as validações existentes na lista de validações
+    Testa_Validacoes(num_ou_nome_objeto = undefined, coloca_focus_erro = true) {
+        if (!this.#Testes_Iniciais(num_ou_nome_objeto)) return false;
+
+        $.each(this.formulario.objetos, function () { this.testado = false });
+        // alert(JSON.stringify(this.formulario.objetos));
+
+        this.#RecolherElementos();
+        let posicoes_validacoes_testar = this.#Verifica_Elemento_Validacao_Existe(num_ou_nome_objeto);
+
+        let existe_erros = false;
+
+        for (let i = 0; i <= posicoes_validacoes_testar.length -1 ; ++i) {
+            //console.log(i);
+            let pos_objeto =this.#Posicao_Elemento_Objetos_Formulario(this.validacoes[i].id);
+
+            if (pos_objeto == -1) continue;
+
+            if (this.formulario.objetos[pos_objeto].testado || this.formulario.objetos[pos_objeto].escondido) continue;
+
+            // comparações
+            let txtcomparacao = this.#Texto_Final(this.validacoes[i].comparacao);
+            if (txtcomparacao == "") {
+                console.log("TESTA_VALIDACOES: (" + this.validacoes[i].id + ") - Expressão de comparação vazia: " + txtcomparacao);
+                continue;
+            }
+
+            let resultado = -1;
+
+            try {
+                resultado = eval?.(txtcomparacao);
+                if (this.validacoes[i].mostra_resultado)
+                    alert(`Comparação: ${txtcomparacao} - Resultado: ${resultado}`);
+            } catch (e) {
+
+            }
+
+            if (typeof resultado != "boolean") {
+                console.error("TESTA_VALIDACOES: (" + num_ou_nome_objeto + ") - Erro ao executar a expressão: " + txtcomparacao);
+                continue;
+            }
+            
+            this.#Colocar_Estado_Caixa(i, resultado, coloca_focus_erro);
+
+            if (resultado) {
+                this.formulario.objetos[pos_objeto].testado = true;
+                
+                if (!existe_erros) {
+                    existe_erros = true;
+                    coloca_focus_erro = false;
+                }
+            }
+        }
+
+        return existe_erros;
     }
 
     Limpar_Validacoes(reset_formulario = true) {
@@ -419,13 +600,14 @@ class formulario {
             this.formulario.limpar_espacos();
     }
 
-    Validar_Caixa_Erro(num_ou_nome_objeto = undefined, valor_erro = undefined, colocar_focus_no_erro = true, evitar_outras_validacoes = false) {
+    Validar_Caixa_Erro (num_ou_nome_objeto = undefined, valor_erro = undefined, colocar_focus_no_erro = true, evitar_outras_validacoes = false) {
         let num_obj = -1;
 
         if (this.validacoes.length == 0) {
             console.error("VALIDAR_CAIXA_ERRO: Não existem validações!");
             return false;
         }
+
         if (!evitar_outras_validacoes) {
             if (num_ou_nome_objeto === undefined) {
                 console.error("VALIDAR_CAIXA_ERRO: = O número ou o id do objeto é indefinido!");
@@ -461,14 +643,14 @@ class formulario {
                 if (!valor_erro) {
                     $(objeto).removeClass("is-invalid");
                     $(objeto).addClass("is-valid");
-                    if ($(objeto_erro) !== undefined && !$(objeto_erro).hasClass("esconde")) 
-                        $(objeto_erro).addClass("esconde");
+                    if ($(objeto_erro) !== undefined && !$(objeto_erro).hasClass(constantes.classe_esconde)) 
+                        $(objeto_erro).addClass(constantes.classe_esconde);
                 }
                 else {
                     $(objeto).removeClass("is-valid");
                     $(objeto).addClass("is-invalid");
                     if ($(objeto_erro) !== undefined) {
-                        $(objeto_erro).removeClass("esconde");
+                        $(objeto_erro).removeClass(constantes.classe_esconde);
                         $(objeto_erro).html(this.validacoes[i].texto_erro);
                         if (colocar_focus_no_erro) $(objeto).focus();
                     }
@@ -492,7 +674,7 @@ class formulario {
                 }
 
                 if (objeto_erro === undefined) {
-                    if (!objeto_erro.hasClass("esconde")) objeto_erro.addClass("esconde");
+                    if (!objeto_erro.hasClass(constantes.classe_esconde)) objeto_erro.addClass(constantes.classe_esconde);
                 }
             }
         else
@@ -506,7 +688,7 @@ class formulario {
             }
 
             if (objeto_erro === undefined) {
-                if (!objeto_erro.hasClass("esconde")) objeto_erro.addClass("esconde");
+                if (!objeto_erro.hasClass(constantes.classe_esconde)) objeto_erro.addClass(constantes.classe_esconde);
             }
         }
     }    

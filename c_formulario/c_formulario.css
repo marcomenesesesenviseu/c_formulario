@@ -1,8 +1,26 @@
-.erro_formulario {
+/***********************************************************/
+/* C_FORMULÁRIO - Validador de formulários                 */
+/* Desenvolvido por Marco Meneses (EMES3SOFT)              */
+/* Versão 1.01                                             */
+/***********************************************************/
+
+.erro_c_formulario {
     margin-top: 3px;
     color: red;
     background-color: lightgray;
     font-size: .70em;
     font-weight: bold;
     width: 100%;
+}
+
+.esconde_c_formulario {
+    display: none;
+}
+
+.objeto_invalido_c_formulario {
+    border: 1px solid red;
+}
+
+.objeto_valido_c_formulario {
+    border: 1px solid green;
 }
