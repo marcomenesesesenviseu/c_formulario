@@ -128,6 +128,7 @@ Ficheiro javascript - index.js (pasta js):
   f_Login.Adiciona_Validacoes(["chkPolitica","!«chkPolitica.checeked», "* É obrigatório concordar com as políticas para entrar!"]);
 
 // Teste das validações ao submeter o formulário
+
   $("#frmLogin").on("submit", function() {
     if (!f_Login.Testa_Validacoes())
       alert('O formulário será enviado!);
