@@ -1,5 +1,6 @@
 # c_formulario
 Módulo JavaScript para criar formulários com validação dinâmica.
+Última versão: 1.01
 
 3 ficheiros necessários
 - c_formulario.css
@@ -18,8 +19,14 @@ bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/
 
 # Limitações desta versão
 
-- Só consegue fazer testes ao conteúdo (val) e ao tamanho (length);
-- Só permite ter uma verificação por validação.
+(UPDATE)
+Consegue fazer testes:
+  - ao conteúdo (val, value)
+  - ao tamanho (length. len)
+  - à inclusão de texto (includes(texto)), devolvendo true ou false
+  - à inclusão de texto (indexof(texto)), devolvendo a posição do texto a procurar no value da tag
+
+~~Só permite ter uma verificação por validação.~~ (FIXED)
 
 # Associar formulário
 
@@ -44,11 +51,11 @@ Linha para associar validações ao formulário:
     - deve criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer (passo a eliminar ma próxima versão)
       - id deve começar por erro_<nome_do_objeto>
       - devem ser-lhe atribuídas as classes
-        - esconde (esconde o objeto)
-        - erro_formulario (formatação onde aparece o erro)
+        - esconde_c_formulario (esconde o objeto) (UPDATE)
+        - erro_c_formulario (formatação onde aparece o erro) (UPDATE)
       - Exemplo:
         <input id="txtUtilizador" type="text" />
-        <div class="esconde erro_formulario" id="erro_txtUtilizador"></div>
+        <div class="esconde_c_formulario erro_c_formulario" id="erro_txtUtilizador"></div>
 
 # Exemplo completo
 Formulário no ficheiro html:
