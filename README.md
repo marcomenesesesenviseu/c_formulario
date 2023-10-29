@@ -33,7 +33,7 @@ Consegue fazer testes:
 # Associar formulário
 
 Linha para criar a associação do formulário:
-- const <variável_para_o_formulário> = new formulario(<id_do_formulário>);
+- const <variável_para_o_formulário> = new c_formulario(<id_do_formulário>);
 
 # Associar validações
 
