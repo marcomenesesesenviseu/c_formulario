@@ -2,10 +2,11 @@
 Módulo JavaScript para criar formulários com validação dinâmica. <br>
 Última versão: 1.01
 
-3 ficheiros necessários
+4 ficheiros contituem o módulo
 - c_formulario.css
 - c_formulario.json
 - c_formulario.js
+- c_formulario.min.js
 
 Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. **(UPDATE)** <br>
 Ainda estou a trabalhar para melhorar o código. <br>
