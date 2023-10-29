@@ -14,8 +14,8 @@ Caso detetem algum problema, enviem email para emes3soft@gmail.com com a descri�
 
 # Outros módulos necessários
 
-JQuery     https://jquery.com/download/
-toast      https://github.com/AucT/b5toast
+JQuery     https://jquery.com/download/ <br>
+toast      https://github.com/AucT/b5toast <br>
 bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/
 
 # Limitações desta versão
