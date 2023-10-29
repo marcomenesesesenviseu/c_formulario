@@ -81,7 +81,7 @@ Imagine-se 3 validações para um objeto:
 # Exemplo completo (UPDATED)
 Formulário no ficheiro index.html e adição dos ficheiro necessários:
 
-<!DOCTYPE html>
+/ <!DOCTYPE html>
 <html lang="pt">
   <head>
     <meta charset="UTF-8">
