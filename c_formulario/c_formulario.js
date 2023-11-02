@@ -1,7 +1,7 @@
 /***********************************************************/
 /* C_FORMULÁRIO - Validador de formulários                 */
 /* Desenvolvido por Marco Meneses (EMES3SOFT)              */
-/* Versão 1.01                                             */
+/* Versão 1.1                                             */
 /***********************************************************/
 
 if (!window.jQuery) {  
@@ -110,7 +110,7 @@ class c_formulario {
     #fich_json_existe() {
         let devolve = $.ajax({
             type: "GET",
-            url: this.ficheiro_mensagens + "ddd",
+            url: this.ficheiro_mensagens,
             async: false,
             dataType: "json",
             data: {},
@@ -384,7 +384,8 @@ class c_formulario {
         let txtstr = texto_comparacao;
         let compara_objeto = [];
         let inicio=0;
-        
+        const emailRegex =/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+
         while (txtstr.indexOf(limitadores.inicial, inicio) != -1) {
             let posicoes = [0,0];
 
@@ -405,11 +406,14 @@ class c_formulario {
             //alert("texto: " + txtstr + " -- strobjetos: " + JSON.stringify(str_objeto_partes));
             let str_objeto_valor = undefined;
 
-            str_objeto_partes[1] = str_objeto_partes[1].toLowerCase();
+            if (str_objeto_partes[1] != undefined) str_objeto_partes[1] = str_objeto_partes[1].toLowerCase();
 
             if (str_objeto_partes.length == 1 || str_objeto_partes[1] == "val" || str_objeto_partes[1] == "value")
                 str_objeto_valor = $("#" + str_objeto_partes[0]).val();
-            else if (str_objeto_partes[1] == "check" || str_objeto_partes[1] == "ckecked")
+            else if (str_objeto_partes[1] == "valemail" || str_objeto_partes[1] == "email"){
+                str_objeto_valor = emailRegex.test($("#" + str_objeto_partes[0]).val());
+            }
+            else if (str_objeto_partes[1] == "check" || str_objeto_partes[1] == "checked")
                 str_objeto_valor = $("#" + str_objeto_partes[0]).is(":checked");
             else if (str_objeto_partes[1] == "length" || str_objeto_partes[1] == "len")
                 if (str_objeto_partes[0].includes("?")) {
