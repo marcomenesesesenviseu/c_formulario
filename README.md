@@ -1,13 +1,13 @@
 # c_formulario
 Módulo JavaScript para criar formulários com validação dinâmica. <br>
-Última versão: 1.01 <br>
-Atualizada em **29/10/2023**
+Última versão: 1.1 <br>
+Atualizada em **02/11/2023**
 
 4 ficheiros contituem o módulo
 - c_formulario.css
 - c_formulario.json
 - c_formulario.js
-- c_formulario.min.js
+~~- c_formulario.min.js~~ **DELETED**
 
 Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. **(UPDATE)** <br>
 Ainda estou a trabalhar para melhorar o código. <br>
@@ -61,6 +61,8 @@ Linha para associar validações ao formulário:
       - Exemplo: "«txtUtilizador.indexof('abc') > -1»"
     - caso necessite testar um grupo de objetos **(NEW)**
       - Exemplo: "«chkTipo_?.length» == 0"
+      - caso necessite de validar um campo de email ou correio eletrónico **(NEW)**
+      - Exemplo: "!«txtUtillizador.email»" ou "!«txtUtilizador.valEmail»"
   - texto de erro a apresentar
     - para que o texto do erro apareça a condição tem de se verificar, ou seja, ser verdadeira
     - deve criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer (passo a eliminar ma próximas versões)
