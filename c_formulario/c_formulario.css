@@ -1,7 +1,7 @@
 /***********************************************************/
 /* C_FORMULÁRIO - Validador de formulários                 */
 /* Desenvolvido por Marco Meneses (EMES3SOFT)              */
-/* Versão 1.1                                              */
+/* Versão 1.2                                              */
 /***********************************************************/
 
 .erro_c_formulario {
@@ -24,3 +24,8 @@
 .objeto_valido_c_formulario {
     border: 1px solid green;
 }
+
+.custom-tooltip {
+    --bs-tooltip-bg: var(--bd-violet-bg);
+    --bs-tooltip-color: var(--bs-white);
+  }

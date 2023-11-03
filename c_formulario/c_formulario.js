@@ -1,7 +1,7 @@
 /***********************************************************/
 /* C_FORMULÁRIO - Validador de formulários                 */
 /* Desenvolvido por Marco Meneses (EMES3SOFT)              */
-/* Versão 1.1                                             */
+/* Versão 1.2                                             */
 /***********************************************************/
 
 if (!window.jQuery) {  
@@ -561,9 +561,11 @@ class c_formulario {
                 $(objeto_erro).addClass(constantes.classe_esconde).text("");
         }
         else {
+            if ($(".toast").length == 0) this.#mostra_mensagem_c_formulario("formulario",0);
             $(objeto).removeClass(classe_valido);
             $(objeto).addClass(classe_erro);
             if ($(objeto_erro) !== undefined) {
+                $(objeto).atualiza_tooltip(this.validacoes[pos_validacao_com_erro].texto_erro, "text-bg-danger");
                 $(objeto_erro).removeClass(constantes.classe_esconde);
                 $(objeto_erro).html(this.validacoes[pos_validacao_com_erro].texto_erro);
                 if (colocar_focus_no_erro) $(objeto).focus();

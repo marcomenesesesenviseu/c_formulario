@@ -1,7 +1,7 @@
 {
     "_projeto" : "C_FORMULÁRIO - Validador de formulários",
     "_autor" : "Desenvolvido por Marco Meneses (EMES3SOFT)",
-    "_versao" : "1.1",
+    "_versao" : "1.2",
     "tempo_de_espera" : 3500,
     "tipos_mensagens": [
         [0, "Erro", "danger", "<i class='fa-solid fa-circle-xmark me-3'></i>"],
@@ -19,5 +19,8 @@
         [2, 0, "C_F - E2", "ObterPosicaoCarater: Erro no tipo do texto (string)"],
         [3, 0, "C_F - E3", "ObterPosicaoCarater: Erro no tipo do texto a procurar (string)"],
         [4, 0, "C_F - E4", "ObterPosicaoCarater: Erro no tipo da posição inicial (int)"]
+    ],
+    "formulario" : [
+        [0, 0, "C_F - E0", "Resolva os erros"]
     ]
 }
