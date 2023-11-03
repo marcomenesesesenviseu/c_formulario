@@ -1,17 +1,16 @@
 # c_formulario
 Módulo JavaScript para criar formulários com validação dinâmica. <br>
-Última versão: 1.1 <br>
-Atualizada em **02/11/2023**
+Última versão: 1.2 <br>
+Atualizada em **03/11/2023**
 
 4 ficheiros contituem o módulo
 - c_formulario.css
 - c_formulario.json
 - c_formulario.js
-~~- c_formulario.min.js~~ **DELETED**
 
-Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. **(UPDATE)** <br>
+Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. <br>
 Ainda estou a trabalhar para melhorar o código. <br>
-Esta já é uma versão funcional, ainda com funcionalidades a serem preparadas. **(UPDATE)** <br>
+Esta já é uma versão funcional, mas ainda com funcionalidades a serem preparadas. <br>
 Caso detetem algum problema, enviem email para emes3soft@gmail.com com a descrição o mais detalhada possível. <br>
 
 # Outros módulos necessários
@@ -20,17 +19,17 @@ JQuery     https://jquery.com/download/ <br>
 toast      https://github.com/AucT/b5toast <br>
 bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/ <br>
 
-# Limitações desta versão
+# Validações desta última versão
 
 Consegue fazer testes:
   - ao conteúdo (val, value)
   - ao tamanho (length, len)
-  - se um caixa de verificação está ou não marcada (checked, check), devolvendo true se estiver marcada ou false caso não esteja marcada **(NEW)**
-  - à inclusão de texto (includes(texto)), devolvendo true caso exista o texto ou false caso não exista **(NEW)**
-  - à inclusão de texto (indexof(texto)), devolvendo a posição do texto a procurar no value da tag, caso não encontre devolve -1 **(NEW)**
-  - teste a um grupo de objetos (só funciona o len e só avalia checkboxs) < _ainda em teste_ > **(NEW)**
-
-~~Só permite ter uma verificação por validação.~~ **(FIXED)**
+  - se um caixa de verificação está ou não marcada (checked, check), devolvendo true se estiver marcada ou false caso não esteja marcada
+  - à inclusão de texto (includes(texto)), devolvendo true caso exista o texto ou false caso não exista
+  - à inclusão de texto (indexof(texto)), devolvendo a posição do texto a procurar no value da tag, caso não encontre devolve -1
+  - teste a um grupo de objetos (só funciona o len e só avalia checkboxs) < _ainda em teste_ >
+  - se é ou não um email válido **(NEW)**
+  - pode utilizar o operador **||** (ou) ou **&&** (e) para testar mais do que um elemento do formulário na mesma validação **(UPDATE)**
 
 # Associar formulário
 
@@ -42,37 +41,38 @@ Linha para criar a associação do formulário:
 Linha para associar validações ao formulário:
 - Função Adiciona_Validacoes() funciona com a entrada de um vetor de 3 elementos
   - id do objeto html
-    - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags **(NEW)**
+    - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
   - condição (comparação)
     - caso se queira referir a um objeto html, deve colocar o seu id entre « e »
-      - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags **(NEW)**
+      - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
     - deve ter um operador condicional (<, >, ==, <=, >=, !=, !==, ===, !)
-      - se usar o _includes_ não necessita de comparação, pois sairá um valor _true_ ou _false_ **(NEW)**
+      - se usar o _includes_ ou o _email_ não necessita de comparação, pois sairá um valor _true_ ou _false_ **(UPDATE)**
     - pode inserir valores para a comparação, colocando-os diretamente como faz numa qualquer comparação em javascript
     - a sua totalidade deve ficar entre aspas
-      - Exemplo: "«txtUtilizador» == ''" ou "«txtUtilizador.val» == ''" ou "«txtUtilizador.value» == ''" **(UPDATED)**
+      - Exemplo: "«txtUtilizador» == ''" ou "«txtUtilizador.val» == ''" ou "«txtUtilizador.value» == ''"
     - caso necessite de testar o comprimento do valor de um objeto
-      - Exemplo: "«txtPalavraPasse.length» < 10" ou "«txtPalavraPasse.len» < 10" **(UPDATED)**
-    - caso necessite testar a marcação de uma caixa de verificação **(NEW)**
+      - Exemplo: "«txtPalavraPasse.length» < 10" ou "«txtPalavraPasse.len» < 10"
+    - caso necessite testar a marcação de uma caixa de verificação **
       - Exemplo: "«txtUtilizador.checked»" ou "«txtUtilizador.checked» == true" ou "!«txtUtilizador.checked»" ou "«txtUtilizador.checked == false»"
-    - caso necessite testar a inclusão de texto (includes(texto)) **(NEW)**
+    - caso necessite testar a inclusão de texto (includes(texto))
       - Exemplo: "«txtUtilizador.includes('abc')»" ou "!«txtUtilizador.includes('abc')»"
-    - caso necessite testar a inclusão de texto (indexof(texto)) **(NEW)**
+    - caso necessite testar a inclusão de texto (indexof(texto))
       - Exemplo: "«txtUtilizador.indexof('abc') > -1»"
-    - caso necessite testar um grupo de objetos **(NEW)**
+    - caso necessite testar um grupo de objetos
       - Exemplo: "«chkTipo_?.length» == 0"
-      - caso necessite de validar um campo de email ou correio eletrónico **(NEW)**
+      - caso necessite de validar um campo de email ou correio eletrónico
       - Exemplo: "!«txtUtillizador.email»" ou "!«txtUtilizador.valEmail»"
   - texto de erro a apresentar
     - para que o texto do erro apareça a condição tem de se verificar, ou seja, ser verdadeira
-    - deve criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer (passo a eliminar ma próximas versões)
-      - id deve começar por erro_<nome_do_objeto>
+    - não existe a necessidade de criar <div> para o erro, pois é criado automaticamente que a caixa seja testada **(NEW)**
+    - contudo, pode criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer **(Ler ponto anterior)** **(UPDATED)**
+      - id deve começar por erro_<nome_do_objeto> 
       - devem ser-lhe atribuídas as classes
-        - esconde_c_formulario (esconde o objeto) **(UPDATED)**
-        - erro_c_formulario (formatação onde aparece o erro) **(UPDATED)**
+        - esconde_c_formulario (esconde o objeto)
+        - erro_c_formulario (formatação onde aparece o erro)
       - Exemplo:
         <input id="txtUtilizador" type="text" />
-        <div class="esconde_c_formulario erro_c_formulario" id="erro_txtUtilizador"></div> **(UPDATED)**
+        <div id="erro_txtUtilizador" class="esconde_c_formulario erro_c_formulario"></div>
 
 # Lógica das validações (NEW)
 
