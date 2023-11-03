@@ -71,19 +71,24 @@ class limitadores {
 
 class constantes {
     static get classe_esconde() { return "esconde_c_formulario" };
+    static get classe_erro() { return "erro_c_formulario" };
     static get classe_geral_valido() { return "is-valid" };
     static get classe_geral_invalido() { return "is-invalid" };
     static get classe_obj_valido() { return "objeto_valido_c_formulario" };
     static get classe_obj_invalido() { return "objeto_invalido_c_formulario" };
-    static get prefixo_obj_erro() { return "erro_" }
+    static get prefixo_obj_erro() { return "erro_" };
 }
 
 class c_formulario {
     constructor(id) {
         this.erros = [];
-        this.mensagens = new mensagens ("c_formulario.json", this.#fich_json_existe(), this.#fich_json_existe() ? this.#ler_ficheiro_c_formulario("tempo_de_espera") : 3500);
+        this.ficheiro_mensagens = "/static/c_formulario/c_formulario.json";
+        this.msgs = new mensagens (this.ficheiro_mensagens, false, 3500);
+        this.msgs.existe =this.#fich_json_existe();
+        this.msgs.tempo_de_espera =  this.#fich_json_existe() ? this.#ler_ficheiro_c_formulario("tempo_de_espera") : this.msgs.tempo_de_espera;
+        // alert('Construtor\nFicheiro: ' + this.msgs.ficheiro + "\nFicheiro existe: " + this.msgs.existe + "\nTempo de espera: " + this.msgs.tempo_de_espera);
 
-        this.id = "#" + id;
+        this.id = this.#Verifica_String_SubString(id,'#') ? id : "#" + id;
         this.nome = id;
 
         this.formulario = $(this.id);
@@ -98,7 +103,8 @@ class c_formulario {
         }
         else
         {
-            this.Adiciona_Erros(["Construtor", "O objeto não é um formulário"]);
+            this.#mostra_mensagem_c_formulario("construtor",0);
+            this.Adiciona_Erros(["Construtor", "O objeto não é um formulário ABC " + this.id]);
             console.log(this.erros[0].funcao + ": " + this.erros[0].mensagem_erro);
         }
 
@@ -106,11 +112,41 @@ class c_formulario {
         this.validacoes.elemento_error = undefined;
     }
 
+    // Verifica se existe uma substring dentro de uma string
+    #Verifica_String_SubString(str = undefined, substr = undefined) {
+        if (str === undefined || substr === undefined)
+            return false;
+        if (typeof str !== "string" || typeof substr !== "string")
+            return false;
+        
+        return str.includes(substr);
+    }
+
+    // Devolve a posição de uma substring dentro de uma string, -1 se não existe
+    #Devolve_Pos_String_SubString(str = undefined, substr = undefined) {
+        if (str === undefined || substr === undefined)
+            return false;
+        if (typeof str !== "string" || typeof substr !== "string")
+            return false;
+        
+        return str.indexOf(substr);
+    }
+
+    #Devolve_Diretoria_Local() {
+        // return require.resolve("c_formulario.js");
+        //     let link = "";
+        // if (document.currentScript) {
+        //     link = document.currentScript.src;
+        //     let lastIndex = link.lastIndexOf('/');
+        //     link = link.substring(0, lastIndex + 1);
+        // }
+        // return link;
+    }
     // Verifica se o ficheiro JSON das mensagens existe
     #fich_json_existe() {
         let devolve = $.ajax({
             type: "GET",
-            url: this.ficheiro_mensagens,
+            url: this.msgs.ficheiro,
             async: false,
             dataType: "json",
             data: {},
@@ -122,22 +158,27 @@ class c_formulario {
                 return -1;
             }
         });
+        
+        // let dado = devolve;
+        // alert(`Ficheiro: ${this.#Devolve_Diretoria_Local()} -- ${this.msgs.ficheiro}\nDevolve: ${JSON.stringify(dado)}`);
 
-        return devolve.responseJSON !== undefined;
+        return devolve !== undefined;
     }
     
     // Ler o ficheiro JSON das mensagens
     #ler_ficheiro_c_formulario(nome_dado, pos = -1) {
         let dado, resp = "-9999";
     
-        if (!this.mensagens.existe) {
-            console.error("O ficheiro json de mensagens não existe: " + this.mensagens.ficheiro);
+        if (!this.msgs.existe) {
+            console.error("O ficheiro json de mensagens não existe: " + this.msgs.ficheiro);
             return -2;
         }
-    
+        // else
+        //     console.log("O ficheiro json: " + this.msgs.ficheiro);
+
         dado = $.ajax({
             type: "GET",
-            url: this.mensagens.ficheiro,
+            url: this.msgs.ficheiro,
             async: false,
             dataType: "json",
             data: {},
@@ -146,7 +187,7 @@ class c_formulario {
                 return info;
             },
             error: function (xhr, type, exception) {
-                console.error('Erro no acesso ao ficheiro de mesnagens: ' + this.messagens.ficheiro);
+                console.error('Erro no acesso ao ficheiro de menagens!\n' + xhr);
                 return -1;
             },
         });
@@ -154,13 +195,13 @@ class c_formulario {
         try {
             resp = dado.responseJSON[nome_dado];
         } catch (e) {
-            console.error('A informação ' + nome_dado + ' não se encontra no ficheiro ' + this.mensagens.ficheiro);
+            console.error('A informação ' + nome_dado + ' não se encontra no ficheiro ' + this.msgs.ficheiro);
             return -1;
         }
 
         if (pos > -1) resp = dado.responseJSON[nome_dado][pos];
     
-        console.log(resp);
+        // console.log(resp);
     
         return resp;
     }
@@ -172,7 +213,7 @@ class c_formulario {
             return false;
         }
         
-        valor = this.#ler_ficheiro_c_formulario(variavel_mensagem);
+        let valor = this.#ler_ficheiro_c_formulario(variavel_mensagem);
     
         let info_msg = null;
         for (let i=0; i < valor.length; i++) 
@@ -186,10 +227,10 @@ class c_formulario {
         {
             let tipo_mensagem = this.#ler_ficheiro_c_formulario("tipos_mensagens",info_msg[1]);
         
-            b5toast.show(tipo_mensagem[2],tipo_mensagem[3] + info_msg[2] + ": " + info_msg[3], com_titulo?tipo_mensagem[1]:'', this.mensagens.tempo_de_espera);
+            b5toast.show(tipo_mensagem[2],tipo_mensagem[3] + info_msg[2] + ": " + info_msg[3], com_titulo?tipo_mensagem[1]:'', this.msgs.tempo_de_espera);
         }
         else
-            b5toast.show('danger',"Variavel não encontrada: " + variavel_mensagem, 'ERRO', this.mensagens.tempo_de_espera);
+            b5toast.show('danger',"Variavel não encontrada: " + variavel_mensagem, 'ERRO', this.msgs.tempo_de_espera);
     }
 
     // Transforma um id em objeto jQUERY
@@ -498,6 +539,7 @@ class c_formulario {
 
         let id_objeto =  this.validacoes[pos_validacao_com_erro].id.includes("?") ? this.validacoes[pos_validacao_com_erro].id.replace("?","") : this.validacoes[pos_validacao_com_erro].id;
         let objeto = "#" + id_objeto;
+        let ultimo_objeto_div = $(objeto).closest("div");
         let objeto_erro = "#" + constantes.prefixo_obj_erro + id_objeto;
 
         let classe_erro = constantes.classe_geral_invalido;
@@ -508,11 +550,15 @@ class c_formulario {
             classe_valido = constantes.classe_obj_valido;
         }
 
+        if (!ultimo_objeto_div.find("." + constantes.classe_erro).length ) {
+            ultimo_objeto_div.append(`<div id="${ objeto_erro.replace("#","") }" class="${constantes.classe_erro} ${constantes.classe_esconde}"></div>`);
+        }
+
         if (!valor_erro) {
             $(objeto).removeClass(classe_erro);
             $(objeto).addClass(classe_valido);
             if ($(objeto_erro) !== undefined && !$(objeto_erro).hasClass(constantes.classe_esconde)) 
-                $(objeto_erro).addClass(constantes.classe_esconde);
+                $(objeto_erro).addClass(constantes.classe_esconde).text("");
         }
         else {
             $(objeto).removeClass(classe_valido);
