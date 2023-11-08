@@ -16,6 +16,16 @@ if (typeof b5toast !== 'object') {
     console.error("A libraria b5toast está em falta.");
 }
 
+$.fn.atualiza_tooltip_c_formulario = function(texto, elem = this) {
+    const bsTooltip_c_formulario = new bootstrap.Tooltip(elem, {containeer: 'form', placement: 'left', title: texto, customClass: 'erro_c_formulario_tooltip', 
+    template: '<div class="tooltip c_formulario" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'});
+    return bsTooltip_c_formulario;
+}
+
+$.fn.hasAttr_c_formulario = function(name) {
+    return this.attr(name) !== undefined;
+};
+
 class comparacoes {
     constructor(expressao, objeto, propriedade, valor) {
         this.expressao = expressao;
@@ -67,9 +77,18 @@ class limitadores {
     static get separador() { return "." };
     static get includes_inicial() { return "('" };
     static get includes_final() { return "')" };
+    static get valores_inicial() { return "{'" };
+    static get valores_final() { return "'}" };
+}
+
+class tipos_aviso {
+    static get aviso_tooltip() { return 'tooltip' };
+    static get aviso_texto() { return 'text' };
+    static get aviso_toast() { return "toast" };
 }
 
 class constantes {
+    static get classe_erro_tooltip() { return "erro_c_formulario_tooltip" };
     static get classe_esconde() { return "esconde_c_formulario" };
     static get classe_erro() { return "erro_c_formulario" };
     static get classe_geral_valido() { return "is-valid" };
@@ -77,19 +96,22 @@ class constantes {
     static get classe_obj_valido() { return "objeto_valido_c_formulario" };
     static get classe_obj_invalido() { return "objeto_invalido_c_formulario" };
     static get prefixo_obj_erro() { return "erro_" };
+    static get tempo_espera() { return 3500 };
+    static get email_regex() { return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ };
 }
 
 class c_formulario {
-    constructor(id) {
+    constructor(id, ficheiro_json_mensagens_personalizadas = undefined) {
         this.erros = [];
         this.ficheiro_mensagens = "/static/c_formulario/c_formulario.json";
         this.msgs = new mensagens (this.ficheiro_mensagens, false, 3500);
-        this.msgs.existe =this.#fich_json_existe();
-        this.msgs.tempo_de_espera =  this.#fich_json_existe() ? this.#ler_ficheiro_c_formulario("tempo_de_espera") : this.msgs.tempo_de_espera;
+        this.msgs.existe = this.#fich_json_existe();
+        this.msgs.tempo_de_espera =  this.#fich_json_existe() ? this.#ler_ficheiro_c_formulario("tempo_de_espera") : constantes.tempo_espera;
         // alert('Construtor\nFicheiro: ' + this.msgs.ficheiro + "\nFicheiro existe: " + this.msgs.existe + "\nTempo de espera: " + this.msgs.tempo_de_espera);
 
-        this.id = this.#Verifica_String_SubString(id,'#') ? id : "#" + id;
         this.nome = id;
+        this.id = this.#Verifica_String_SubString(id,'#') ? id : "#" + id;
+        this.tipo_aviso = tipos_aviso.aviso_texto;
 
         this.formulario = $(this.id);
         this.formulario.encontrarobjetos = "input,textarea,select";
@@ -97,7 +119,9 @@ class c_formulario {
         this.formulario.elementos = [];
         this.formulario.num_elementos = this.formulario.elementos.length;
         this.formulario.objetos = [];
-    
+        this.formulario.ficheiro_mensagens = (ficheiro_json_mensagens_personalizadas == undefined || this.#fich_json_existe()) ? this.ficheiro_mensagens : ficheiro_json_mensagens_personalizadas;
+        // alert('Construtor\n ' + JSON.stringify(this.formulario));
+
         if (this.formulario.is("form")) {
             this.#RecolherElementos();
         }
@@ -143,30 +167,28 @@ class c_formulario {
         // return link;
     }
     // Verifica se o ficheiro JSON das mensagens existe
-    #fich_json_existe() {
-        let devolve = $.ajax({
+    #fich_json_existe(ficheiro_json = undefined) {
+        let devolve = false
+        
+        $.ajax({
             type: "GET",
-            url: this.msgs.ficheiro,
+            url: (ficheiro_json == undefined) ? this.msgs.ficheiro : ficheiro_json,
             async: false,
             dataType: "json",
             data: {},
             success: function (data) {
-                let info = JSON.stringify(data);
-                return info;
-            },
-            error: function () {
-                return -1;
+                devolve = true;
             }
         });
         
         // let dado = devolve;
-        // alert(`Ficheiro: ${this.#Devolve_Diretoria_Local()} -- ${this.msgs.ficheiro}\nDevolve: ${JSON.stringify(dado)}`);
+        //alert(`Ficheiro: ${this.#Devolve_Diretoria_Local()} -- ${this.msgs.ficheiro}\nDevolve: ${JSON.stringify(devolve)}`);
 
-        return devolve !== undefined;
+        return devolve;
     }
     
     // Ler o ficheiro JSON das mensagens
-    #ler_ficheiro_c_formulario(nome_dado, pos = -1) {
+    #ler_ficheiro_c_formulario(nome_dado, pos = -1, ficheiro_json = undefined) {
         let dado, resp = "-9999";
     
         if (!this.msgs.existe) {
@@ -178,7 +200,7 @@ class c_formulario {
 
         dado = $.ajax({
             type: "GET",
-            url: this.msgs.ficheiro,
+            url: (ficheiro_json == undefined) ? this.msgs.ficheiro : ficheiro_json,
             async: false,
             dataType: "json",
             data: {},
@@ -406,18 +428,97 @@ class c_formulario {
     }
 
     // Devolve o texto entre dois limitadores
-    #Devolve_texto_entre_limitadores(texto, limitador_inicial, limitador_final)
-    {
+    #Devolve_texto_entre_limitadores(texto, limitador_inicial, limitador_final, inclui_limitadores = false) {
         if (!texto.includes(limitador_inicial) || !texto.includes(limitador_final)) {
-            console.error(`DEVOLVE_TEXTO_ENTRE_LIMITADORES: O objeto ${num_ou_nome_objeto} não contém os limitadores « ou »!`);
+            console.error(`DEVOLVE_TEXTO_ENTRE_LIMITADORES: O objeto ${num_ou_nome_objeto} não contém os limitadores ${limitador_inicial} ou ${limitador_final}!`);
             return -1;
         }
         else {
-            let pos_inicio = texto.indexOf(limitador_inicial) + limitador_inicial.length;
-            let pos_final = texto.indexOf(limitador_final, pos_inicio);
+            let pos_inicio = texto.indexOf(limitador_inicial) + limitador_inicial.length + (inclui_limitadores ? -1 : 0);
+            let pos_final = texto.indexOf(limitador_final, pos_inicio) + (inclui_limitadores ? 1 : 0);
 
             return texto.substring(pos_inicio, pos_final)
         }
+    }
+
+    #Verifica_Dicionario(valor_a_testar) {
+        return Object.prototype.toString.call(valor_a_testar) === '[object Object]'
+    }
+
+    // Através de um endereço e de dados que este necessite, efetuar uma devolução de valores
+    #Pedido_Valores($ligacao, $dados = {}) {
+        let $devolve = undefined;
+
+        // Make an AJAX request to the server to add the new category
+        $.ajax({
+            url: $ligacao,
+            type: "POST",
+            data: $dados,
+            async: false,
+            success: function (data) {
+                $devolve = data;
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                devolve = xhr.status + " - " + xhr.responseText;
+            }
+        });
+
+        return $devolve;
+    }
+
+    // Através de um endereço e dos dados do formulário, efetuar uma devolução de valores
+    #Pedido_Valores_Formulario($ligacao) { //, $nome_formulario = "") {
+        let devolve = undefined;
+
+        // Get the form data
+        let $formData = $(this.id).serialize();
+        // if ($("#" + $nome_formulario).is("form")) //$nome_formulario != "")
+        //     $formData = $(this.id).serialize();
+        // else
+        //     return -2;
+
+        // Make an AJAX request to the server to add the new category
+        $.ajax({
+            url: $ligacao,
+            type: "POST",
+            data: $formData,
+            async: false,
+            success: function (data) {
+                devolve = data;
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                devolve = xhr.status + " - " + xhr.responseText;
+            }
+        });
+
+        return devolve;
+    }
+
+    #Devolve_posicao_limitadores(texto_a_verificar, inicio_em = 0, incluir_limitadores = true) {
+        //let inicio = texto_a_verificar.indexOf(limitadores.valores_inicial, inicio_em);
+        let posicoes_limitadores = [-1,-1];
+        let cont_limitadores = [0,0];
+
+        inicio_em = texto_a_verificar.indexOf(limitadores.inicial, inicio_em);
+
+        if (inicio_em == -1) 
+            return posicoes_limitadores;
+
+        for (let posicoes = inicio_em; posicoes <= texto_a_verificar.length; ++posicoes) {
+            if (texto_a_verificar[posicoes] == limitadores.inicial) {
+                cont_limitadores[0]++;
+                if (posicoes_limitadores[0] == -1) posicoes_limitadores[0] = posicoes + (incluir_limitadores ? 0 : 1);
+            }
+            if (texto_a_verificar[posicoes] == limitadores.final)
+                cont_limitadores[1]++;
+            if (cont_limitadores[0] == cont_limitadores[1]) {
+                posicoes_limitadores[1] = posicoes + (incluir_limitadores ? 1 : -1);
+                //alert("Posições: " + posicoes_limitadores);
+                return posicoes_limitadores;
+            }
+        }
+
+        return [-1,-1];
     }
 
     // Elabora o texto final de comparação com a substituição dos objetos pelos seus valores
@@ -425,21 +526,22 @@ class c_formulario {
         let txtstr = texto_comparacao;
         let compara_objeto = [];
         let inicio=0;
-        const emailRegex =/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        // const emailRegex =/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
         while (txtstr.indexOf(limitadores.inicial, inicio) != -1) {
-            let posicoes = [0,0];
+            let posicoes = this.#Devolve_posicao_limitadores(txtstr, inicio);
 
-            posicoes[0] = txtstr.indexOf(limitadores.inicial, inicio);
-            posicoes[1] = txtstr.indexOf(limitadores.final, inicio) + 1;
             inicio = posicoes[1];
 
             let str_objeto = txtstr.substr(posicoes[0], posicoes[1]);
+            alert("STR_OBJETO: " + str_objeto);
 
             let str_objeto_partes = [];
             if (str_objeto.includes(limitadores.separador)) {
                 str_objeto_partes.push(str_objeto.split(limitadores.separador)[0].replace(limitadores.inicial,"").replace(limitadores.final,""));
-                str_objeto_partes.push(str_objeto.split(limitadores.separador)[1].replace(limitadores.inicial,"").replace(limitadores.final,""))
+                str_objeto_partes.push(str_objeto.split(limitadores.separador)[1].replace(limitadores.inicial,"").replace(limitadores.final,""));
+                //str_objeto_partes.push(str_objeto.substring(1,str_objeto.length-1));
+                //alert(str_objeto.substring(1,str_objeto.length-1));
             }
             else
                 str_objeto_partes.push(str_objeto.replace(limitadores.inicial,"").replace(limitadores.final,""));
@@ -452,7 +554,7 @@ class c_formulario {
             if (str_objeto_partes.length == 1 || str_objeto_partes[1] == "val" || str_objeto_partes[1] == "value")
                 str_objeto_valor = $("#" + str_objeto_partes[0]).val();
             else if (str_objeto_partes[1] == "valemail" || str_objeto_partes[1] == "email"){
-                str_objeto_valor = emailRegex.test($("#" + str_objeto_partes[0]).val());
+                str_objeto_valor = constantes.email_regex.test($("#" + str_objeto_partes[0]).val());
             }
             else if (str_objeto_partes[1] == "check" || str_objeto_partes[1] == "checked")
                 str_objeto_valor = $("#" + str_objeto_partes[0]).is(":checked");
@@ -481,6 +583,37 @@ class c_formulario {
                 }
                 else 
                     str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INDEXOF"
+            }
+            else if (str_objeto_partes[1].includes("val_address")) {
+                str_objeto_valor = this.#Texto_Final(this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.valores_inicial,limitadores.valores_final,true)); 
+                alert(str_objeto_valor);
+                try {
+                    str_objeto_valor = JSON.parse(str_objeto_valor);
+                    if (!this.#Verifica_Dicionario(str_objeto_valor)) 
+                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Estrutura de valores inválida"
+                    if (str_objeto_partes.link == undefined || str_objeto.data == undefined)
+                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Valor de LINK ou DATA inválida"
+                    str_objeto_valor =  this.#Pedido_Valores(str_objeto_valor.link, str_objeto_partes.data);
+                }
+                catch (error) {
+                    //console.error("ERRO: " + error.toString());
+                    return error.toString();
+                }
+            }
+            else if (str_objeto_partes[1] == "val_address_form") {
+                str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.valores_inicial,limitadores.valores_final);
+                try {
+                    str_objeto_valor = JSON.parse(str_objeto_valor);
+                    if (!this.#Verifica_Dicionario(str_objeto_valor)) 
+                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Estrutura de valores inválida"
+                    if (str_objeto_partes.link == undefined)
+                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Valor de LINK ou DATA inválida"
+                    str_objeto_valor =  this.#Pedido_Valores_Formulario(str_objeto_valor.link);
+                }
+                catch (error) {
+                    //console.error("ERRO: " + error.toString());
+                    return error.toString();
+                }
             }
             else
                 str_objeto_valor = "ERRO DE PROPRIEDADE"
@@ -539,7 +672,6 @@ class c_formulario {
 
         let id_objeto =  this.validacoes[pos_validacao_com_erro].id.includes("?") ? this.validacoes[pos_validacao_com_erro].id.replace("?","") : this.validacoes[pos_validacao_com_erro].id;
         let objeto = "#" + id_objeto;
-        let ultimo_objeto_div = $(objeto).closest("div");
         let objeto_erro = "#" + constantes.prefixo_obj_erro + id_objeto;
 
         let classe_erro = constantes.classe_geral_invalido;
@@ -550,29 +682,66 @@ class c_formulario {
             classe_valido = constantes.classe_obj_valido;
         }
 
-        if (!ultimo_objeto_div.find("." + constantes.classe_erro).length ) {
-            ultimo_objeto_div.append(`<div id="${ objeto_erro.replace("#","") }" class="${constantes.classe_erro} ${constantes.classe_esconde}"></div>`);
+        switch (this.tipo_aviso) {
+            case tipos_aviso.aviso_tooltip:
+                $(objeto).attr('data-bs-toggle','tooltip_c_formulario');
+                break;
+            case tipos_aviso.aviso_texto:
+                let ultimo_objeto_div = $(objeto).closest("div");
+
+                if ($(objeto).is(":checkbox") || this.validacoes[pos_validacao_com_erro].id.includes("?")) {
+                    let objeto_anterior = ultimo_objeto_div.parent();
+
+                    if (!objeto_anterior.find(objeto_erro).length) {
+                        ultimo_objeto_div.after(`<div id="${ objeto_erro.replace("#","") }" class="${constantes.classe_erro} ${constantes.classe_esconde}"></div>`);
+                    }
+                }
+                else {
+                    if (!ultimo_objeto_div.find(objeto_erro).length) {
+                        ultimo_objeto_div.append(`<div id="${ objeto_erro.replace("#","") }" class="${constantes.classe_erro} ${constantes.classe_esconde}"></div>`);
+                    }
+                }
+                break;
+            case tipos_aviso.aviso_toast:
+                break;
         }
 
         if (!valor_erro) {
             $(objeto).removeClass(classe_erro);
             $(objeto).addClass(classe_valido);
-            if ($(objeto_erro) !== undefined && !$(objeto_erro).hasClass(constantes.classe_esconde)) 
-                $(objeto_erro).addClass(constantes.classe_esconde).text("");
+
+            switch (this.tipo_aviso) {
+                case tipos_aviso.aviso_tooltip:
+                    $(objeto).apaga_tooltip();
+                    break;
+                case tipos_aviso.aviso_texto:
+                    if ($(objeto_erro) !== undefined && !$(objeto_erro).hasClass(constantes.classe_esconde)) 
+                        $(objeto_erro).addClass(constantes.classe_esconde).text("");
+                    break;
+                case tipos_aviso.aviso_toast:
+                    break;            
+            }            
         }
         else {
-            // if ($(".toast").length == 0) this.#mostra_mensagem_c_formulario("formulario",0);
+            if ($(".toast").length == 0) this.#mostra_mensagem_c_formulario("formulario",0);
             $(objeto).removeClass(classe_valido);
             $(objeto).addClass(classe_erro);
-            if ($(objeto_erro) !== undefined) {
-                // $(objeto).atualiza_tooltip(this.validacoes[pos_validacao_com_erro].texto_erro, "text-bg-danger");
-                $(objeto_erro).removeClass(constantes.classe_esconde);
-                $(objeto_erro).html(this.validacoes[pos_validacao_com_erro].texto_erro);
-                if (colocar_focus_no_erro) $(objeto).focus();
+
+            switch (this.tipo_aviso) {
+                case tipos_aviso.aviso_tooltip:
+                    $(objeto).atualiza_tooltip_c_formulario(this.validacoes[pos_validacao_com_erro].texto_erro);
+                    break;
+                case tipos_aviso.aviso_texto:
+                    if ($(objeto_erro) !== undefined) {
+                        $(objeto_erro).removeClass(constantes.classe_esconde);
+                        $(objeto_erro).html(this.validacoes[pos_validacao_com_erro].texto_erro);
+                    }
+                    break;
+                case tipos_aviso.aviso_toast:
+                    break;            
             }
-            else {
-                console.log(`COLOCAR_ESTADO_CAIXA: O objeto ${objeto} não tem objeto de erro ${objeto_erro}`);
-            }
+
+            if (colocar_focus_no_erro) $(objeto).focus();
         }
     }
 
@@ -627,6 +796,11 @@ class c_formulario {
                 }
             }
         }
+
+        // if (existe_erros) {
+        //     const tooltip_c_formulario_TriggerList = document.querySelectorAll('[data-bs-toggle="tooltip_c_formulario"]');
+        //     const tooltipList = [...tooltip_c_formulario_TriggerList].map(tooltip_c_formulario_Trigger_ => new bootstrap.Tooltip(tooltip_c_formulario_Trigger_));
+        // }
 
         return existe_erros;
     }
