@@ -1,7 +1,7 @@
 /***********************************************************/
 /* C_FORMULÁRIO - Validador de formulários                 */
 /* Desenvolvido por Marco Meneses (EMES3SOFT)              */
-/* Versão 1.2                                             */
+/* Versão 1.3                                             */
 /***********************************************************/
 
 if (!window.jQuery) {  
@@ -77,8 +77,9 @@ class limitadores {
     static get separador() { return "." };
     static get includes_inicial() { return "('" };
     static get includes_final() { return "')" };
-    static get valores_inicial() { return "{'" };
-    static get valores_final() { return "'}" };
+    static get valores_inicial() { return "((" };
+    static get valores_final() { return "))" };
+    static get separador_valores() { return ";;" }
 }
 
 class tipos_aviso {
@@ -98,14 +99,17 @@ class constantes {
     static get prefixo_obj_erro() { return "erro_" };
     static get tempo_espera() { return 3500 };
     static get email_regex() { return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/ };
+    static get nome_ficheiro_json() { return "c_formulario.json" };
 }
 
 class c_formulario {
     constructor(id, ficheiro_json_mensagens_personalizadas = undefined) {
         this.erros = [];
-        this.ficheiro_mensagens = "/static/c_formulario/c_formulario.json";
+        this.caminho = this.#Devolve_Diretoria_Local();
+
         this.msgs = new mensagens (this.ficheiro_mensagens, false, 3500);
-        this.msgs.existe = this.#fich_json_existe();
+        this.msgs.ficheiro = this.caminho + constantes.nome_ficheiro_json;
+        this.msgs.existe = this.#fich_json_existe(this.msgs.ficheiro);
         this.msgs.tempo_de_espera =  this.#fich_json_existe() ? this.#ler_ficheiro_c_formulario("tempo_de_espera") : constantes.tempo_espera;
         // alert('Construtor\nFicheiro: ' + this.msgs.ficheiro + "\nFicheiro existe: " + this.msgs.existe + "\nTempo de espera: " + this.msgs.tempo_de_espera);
 
@@ -119,7 +123,7 @@ class c_formulario {
         this.formulario.elementos = [];
         this.formulario.num_elementos = this.formulario.elementos.length;
         this.formulario.objetos = [];
-        this.formulario.ficheiro_mensagens = (ficheiro_json_mensagens_personalizadas == undefined || this.#fich_json_existe()) ? this.ficheiro_mensagens : ficheiro_json_mensagens_personalizadas;
+        this.formulario.ficheiro_mensagens = (ficheiro_json_mensagens_personalizadas != undefined && this.#fich_json_existe(ficheiro_json_mensagens_personalizadas)) ? this.ficheiro_mensagens : ficheiro_json_mensagens_personalizadas;
         // alert('Construtor\n ' + JSON.stringify(this.formulario));
 
         if (this.formulario.is("form")) {
@@ -157,15 +161,19 @@ class c_formulario {
     }
 
     #Devolve_Diretoria_Local() {
-        // return require.resolve("c_formulario.js");
-        //     let link = "";
-        // if (document.currentScript) {
-        //     link = document.currentScript.src;
-        //     let lastIndex = link.lastIndexOf('/');
-        //     link = link.substring(0, lastIndex + 1);
-        // }
-        // return link;
+        let diretoria = undefined;
+
+        $.each(document.querySelectorAll("script"), function() {
+            if ($(this).attr("src").includes("c_formulario")) {
+                let lastIndex = $(this).attr("src").lastIndexOf('/');
+                diretoria = $(this).attr("src").substring(0, lastIndex + 1);
+                return;
+            }
+        });
+
+        return diretoria;
     }
+
     // Verifica se o ficheiro JSON das mensagens existe
     #fich_json_existe(ficheiro_json = undefined) {
         let devolve = false
@@ -430,7 +438,7 @@ class c_formulario {
     // Devolve o texto entre dois limitadores
     #Devolve_texto_entre_limitadores(texto, limitador_inicial, limitador_final, inclui_limitadores = false) {
         if (!texto.includes(limitador_inicial) || !texto.includes(limitador_final)) {
-            console.error(`DEVOLVE_TEXTO_ENTRE_LIMITADORES: O objeto ${num_ou_nome_objeto} não contém os limitadores ${limitador_inicial} ou ${limitador_final}!`);
+            console.error(`DEVOLVE_TEXTO_ENTRE_LIMITADORES: O objeto ${texto} não contém os limitadores ${limitador_inicial} ou ${limitador_final}!`);
             return -1;
         }
         else {
@@ -441,19 +449,25 @@ class c_formulario {
         }
     }
 
+    // Devolve verdadeiro ou false, caso seja um dicionário ou não
     #Verifica_Dicionario(valor_a_testar) {
         return Object.prototype.toString.call(valor_a_testar) === '[object Object]'
     }
 
     // Através de um endereço e de dados que este necessite, efetuar uma devolução de valores
-    #Pedido_Valores($ligacao, $dados = {}) {
-        let $devolve = undefined;
+    #Pedido_Valores($ligacao = undefined, $dados = undefined) {
+        console.log(`PEDIDO__VALORES: ${$ligacao} -- ${$dados}`)
 
+        if ($ligacao == undefined || $dados == undefined)
+            return undefined;
+        
+        let $devolve = undefined;
+        console.log(`PEDIDO__VALORES: ${$dados}`)
         // Make an AJAX request to the server to add the new category
         $.ajax({
             url: $ligacao,
             type: "POST",
-            data: $dados,
+            data: JSON.parse($dados.toString()),
             async: false,
             success: function (data) {
                 $devolve = data;
@@ -463,6 +477,7 @@ class c_formulario {
             }
         });
 
+        console.log(`DEVOLVE: ${$devolve}`);
         return $devolve;
     }
 
@@ -499,134 +514,161 @@ class c_formulario {
         let posicoes_limitadores = [-1,-1];
         let cont_limitadores = [0,0];
 
+        //console.log(`Texto a verificar: ${texto_a_verificar}`);
         inicio_em = texto_a_verificar.indexOf(limitadores.inicial, inicio_em);
 
         if (inicio_em == -1) 
             return posicoes_limitadores;
 
+        //alert(`Posição: ${inicio_em} -- Tamanho texto: ${texto_a_verificar.length}`);
         for (let posicoes = inicio_em; posicoes <= texto_a_verificar.length; ++posicoes) {
+            //alert(`CONTA LIMITADORES: ${cont_limitadores.toString()}`);
             if (texto_a_verificar[posicoes] == limitadores.inicial) {
                 cont_limitadores[0]++;
-                if (posicoes_limitadores[0] == -1) posicoes_limitadores[0] = posicoes + (incluir_limitadores ? 0 : 1);
+                posicoes_limitadores[0] = posicoes + (incluir_limitadores ? 0 : 1);
             }
-            if (texto_a_verificar[posicoes] == limitadores.final)
-                cont_limitadores[1]++;
-            if (cont_limitadores[0] == cont_limitadores[1]) {
-                posicoes_limitadores[1] = posicoes + (incluir_limitadores ? 1 : -1);
-                //alert("Posições: " + posicoes_limitadores);
-                return posicoes_limitadores;
+            else if (texto_a_verificar[posicoes] == limitadores.final) {
+                posicoes_limitadores[1] = posicoes + (incluir_limitadores ? 1 : 0);
+                break;
             }
         }
 
-        return [-1,-1];
+        return posicoes_limitadores;
+    }
+
+    // Conta o nº de limitadores
+    #Devolve_Valor_Texto() {
+
     }
 
     // Elabora o texto final de comparação com a substituição dos objetos pelos seus valores
-    #Texto_Final(texto_comparacao) {
+    #Texto_Final(texto_comparacao, inicio = 0) {
         let txtstr = texto_comparacao;
-        let compara_objeto = [];
-        let inicio=0;
+        //let compara_objeto = [];
+        let conta_repeticoes = 0;
         // const emailRegex =/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
+        //console.log(`Texto_Comparação: ${texto_comparacao}\nPosição do limitador inicial: ${txtstr.indexOf(limitadores.inicial, inicio)}`);
         while (txtstr.indexOf(limitadores.inicial, inicio) != -1) {
+            // console.log(`Repetições: ${++conta_repeticoes}`);
+            
+            if (++conta_repeticoes > 3) break;
+
             let posicoes = this.#Devolve_posicao_limitadores(txtstr, inicio);
 
-            inicio = posicoes[1];
-
-            let str_objeto = txtstr.substr(posicoes[0], posicoes[1]);
-            alert("STR_OBJETO: " + str_objeto);
+            let str_objeto = txtstr.substring(posicoes[0], posicoes[1]);
 
             let str_objeto_partes = [];
-            if (str_objeto.includes(limitadores.separador)) {
-                str_objeto_partes.push(str_objeto.split(limitadores.separador)[0].replace(limitadores.inicial,"").replace(limitadores.final,""));
-                str_objeto_partes.push(str_objeto.split(limitadores.separador)[1].replace(limitadores.inicial,"").replace(limitadores.final,""));
-                //str_objeto_partes.push(str_objeto.substring(1,str_objeto.length-1));
-                //alert(str_objeto.substring(1,str_objeto.length-1));
+            if (str_objeto.includes("val_address") || str_objeto.includes("val_address_form")) {
+                str_objeto_partes.push(str_objeto.substr(1, str_objeto.length-2));
             }
-            else
+            else if (str_objeto.includes(limitadores.separador)) {
+                str_objeto_partes.push(str_objeto.split(limitadores.separador)[0].replace(limitadores.inicial,"").replace(limitadores.final,""));
+                str_objeto_partes.push(str_objeto.split(limitadores.separador)[1].replace(limitadores.inicial,"").replace(limitadores.final,"").toLowerCase());
+            }
+            else{
                 str_objeto_partes.push(str_objeto.replace(limitadores.inicial,"").replace(limitadores.final,""));
+            }
 
-            //alert("texto: " + txtstr + " -- strobjetos: " + JSON.stringify(str_objeto_partes));
             let str_objeto_valor = undefined;
 
-            if (str_objeto_partes[1] != undefined) str_objeto_partes[1] = str_objeto_partes[1].toLowerCase();
+            if (str_objeto_partes.length == 1) {
+                if (str_objeto_partes[0].includes("data_address")) {
+                    if (str_objeto_partes[0].indexOf(limitadores.valores_inicial) == -1 || str_objeto_partes[0].indexOf(limitadores.valores_final) == -1) {
+                        str_objeto_valor = `ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Existem um ou os dois limitadores dos dados  - ${limitadores.valores_inicial} ou ${limitadores.valores_final}`;
+                    }
+                    else {
+                        str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[0],limitadores.valores_inicial,limitadores.valores_final,false);
+        
+                        try {
+                            str_objeto_valor = str_objeto_valor.split(limitadores.separador_valores);
 
-            if (str_objeto_partes.length == 1 || str_objeto_partes[1] == "val" || str_objeto_partes[1] == "value")
-                str_objeto_valor = $("#" + str_objeto_partes[0]).val();
-            else if (str_objeto_partes[1] == "valemail" || str_objeto_partes[1] == "email"){
-                str_objeto_valor = constantes.email_regex.test($("#" + str_objeto_partes[0]).val());
+                            if (str_objeto_valor[0] == undefined || typeof str_objeto_valor[0] !== "string") {
+                                str_objeto_valor = `ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Valor de LINK (${str_objeto_valor[0]})`;
+                            }
+                            else if (str_objeto_valor[1] == undefined || typeof str_objeto_valor[1] !== "string") {
+                                str_objeto_valor = `ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Valor de DATA inválida (${str_objeto_valor[1]})`;
+                            }
+                            else {
+                                str_objeto_valor =  parseInt(this.#Pedido_Valores(str_objeto_valor[0], str_objeto_valor[1]));
+                            }
+                        }
+                        catch (error) {
+                            str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: " + error.toString();
+                        }
+                    }
+                }
+                else if (str_objeto_partes[0].includes("form_address")) {
+                    str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[0],limitadores.valores_inicial,limitadores.valores_final,false);
+
+                    try {
+                        str_objeto_valor = str_objeto_valor.split(limitadores.separador_valores);
+
+                        if (str_objeto_valor[0] == undefined || typeof str_objeto_valor[0] !== "string") {
+                            str_objeto_valor = `ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS_FORM: Valor de LINK inválido (${str_objeto_valor[0]})`;
+                        }
+                        else if (str_objeto_valor[1] == undefined || typeof str_objeto_valor[1] !== "string" || !$("#" + str_objeto_valor[1]).is("form")) {
+                            str_objeto_valor = `ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS_FORM: Valor de DATA inválida (${str_objeto_valor[1]})`;
+                        }
+                        else {
+                            str_objeto_valor = parseInt(this.#Pedido_Valores_Formulario(str_objeto_valor[0], str_objeto_valor[1]));
+                        }
+                    }
+                    catch (error) {
+                        str_objeto_valor = `ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS_FORM: ${error.toString()}`;
+                    }
+                }
             }
-            else if (str_objeto_partes[1] == "check" || str_objeto_partes[1] == "checked")
-                str_objeto_valor = $("#" + str_objeto_partes[0]).is(":checked");
-            else if (str_objeto_partes[1] == "length" || str_objeto_partes[1] == "len")
-                if (str_objeto_partes[0].includes("?")) {
-                    str_objeto_partes[0] = str_objeto_partes[0].replace("?","")
-                    str_objeto_valor = $("input[name*='" + str_objeto_partes[0] + "']:checked").length;
+            else {
+                if (str_objeto_partes[1] == "val" || str_objeto_partes[1] == "value")
+                    str_objeto_valor = $("#" + str_objeto_partes[0]).val();
+                else if (str_objeto_partes[1] == "valemail" || str_objeto_partes[1] == "email"){
+                    str_objeto_valor = constantes.email_regex.test($("#" + str_objeto_partes[0]).val());
+                }
+                else if (str_objeto_partes[1] == "check" || str_objeto_partes[1] == "checked")
+                    str_objeto_valor = $("#" + str_objeto_partes[0]).is(":checked");
+                else if (str_objeto_partes[1] == "length" || str_objeto_partes[1] == "len") {
+                    if (str_objeto_partes[0].includes("?")) {
+                        str_objeto_partes[0] = str_objeto_partes[0].replace("?","")
+                        str_objeto_valor = $("input[name*='" + str_objeto_partes[0] + "']:checked").length;
+                    }
+                    else
+                        str_objeto_valor = $("#" + str_objeto_partes[0]).val().length;
+                }
+                else if (str_objeto_partes[1].includes("isnumeric"))
+                    str_objeto_valor = !$.isNumeric($("#" + str_objeto_partes[0]).val());
+                else if (str_objeto_partes[1].includes("includes")) {
+                    if (str_objeto_partes[1].includes(limitadores.includes_inicial) && str_objeto_partes[1].includes(limitadores.includes_final)){
+                        str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.includes_inicial,limitadores.includes_final);
+                        str_objeto_valor =  $("#" + str_objeto_partes[0]).val().includes(str_objeto_valor);
+                    }
+                    else 
+                        str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INCLUDES"
+                }
+                else if (str_objeto_partes[1].includes("indexof")) {
+                    if (str_objeto_partes[1].includes(limitadores.includes_inicial) && str_objeto_partes[1].includes(limitadores.includes_final)){
+                        str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.includes_inicial,limitadores.includes_final);
+                        str_objeto_valor =  $("#" + str_objeto_partes[0]).val().indexOf(str_objeto_valor);
+                    }
+                    else 
+                        str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INDEXOF"
                 }
                 else
-                    str_objeto_valor = $("#" + str_objeto_partes[0]).val().length;
-            else if (str_objeto_partes[1].toLowerCase().includes("isnumeric"))
-                str_objeto_valor = !$.isNumeric($("#" + str_objeto_partes[0]).val());
-            else if (str_objeto_partes[1].toLowerCase().includes("includes")) {
-                if (str_objeto_partes[1].includes(limitadores.includes_inicial) && str_objeto_partes[1].includes(limitadores.includes_final)){
-                    str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.includes_inicial,limitadores.includes_final);
-                    str_objeto_valor =  $("#" + str_objeto_partes[0]).val().includes(str_objeto_valor);
-                }
-                else 
-                    str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INCLUDES"
+                    str_objeto_valor = "ERRO DE PROPRIEDADE NÃO IDENTIFICADO"
             }
-            else if (str_objeto_partes[1].toLowerCase().includes("indexof")) {
-                if (str_objeto_partes[1].includes(limitadores.includes_inicial) && str_objeto_partes[1].includes(limitadores.includes_final)){
-                    str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.includes_inicial,limitadores.includes_final);
-                    str_objeto_valor =  $("#" + str_objeto_partes[0]).val().indexOf(str_objeto_valor);
-                    //alert(`#Texto_Final\nObjecto: ${str_objeto_partes[0]}\nValor a devolver: ${str_objeto_valor}`);
-                }
-                else 
-                    str_objeto_valor = "ERRO AO AVALIAR A PROPRIEDADE INDEXOF"
-            }
-            else if (str_objeto_partes[1].includes("val_address")) {
-                str_objeto_valor = this.#Texto_Final(this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.valores_inicial,limitadores.valores_final,true)); 
-                alert(str_objeto_valor);
-                try {
-                    str_objeto_valor = JSON.parse(str_objeto_valor);
-                    if (!this.#Verifica_Dicionario(str_objeto_valor)) 
-                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Estrutura de valores inválida"
-                    if (str_objeto_partes.link == undefined || str_objeto.data == undefined)
-                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Valor de LINK ou DATA inválida"
-                    str_objeto_valor =  this.#Pedido_Valores(str_objeto_valor.link, str_objeto_partes.data);
-                }
-                catch (error) {
-                    //console.error("ERRO: " + error.toString());
-                    return error.toString();
-                }
-            }
-            else if (str_objeto_partes[1] == "val_address_form") {
-                str_objeto_valor = this.#Devolve_texto_entre_limitadores(str_objeto_partes[1],limitadores.valores_inicial,limitadores.valores_final);
-                try {
-                    str_objeto_valor = JSON.parse(str_objeto_valor);
-                    if (!this.#Verifica_Dicionario(str_objeto_valor)) 
-                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Estrutura de valores inválida"
-                    if (str_objeto_partes.link == undefined)
-                        return "ERRO AO AVALIAR A PROPRIEDADE VAL_ADDRESS: Valor de LINK ou DATA inválida"
-                    str_objeto_valor =  this.#Pedido_Valores_Formulario(str_objeto_valor.link);
-                }
-                catch (error) {
-                    //console.error("ERRO: " + error.toString());
-                    return error.toString();
-                }
-            }
-            else
-                str_objeto_valor = "ERRO DE PROPRIEDADE"
 
-            if ((typeof str_objeto_valor).toLowerCase() === 'string')
-                str_objeto_valor = "'" + str_objeto_valor + "'"
+            if (str_objeto_valor!=undefined && (typeof str_objeto_valor).toLowerCase() === 'string')
+                str_objeto_valor = `"${str_objeto_valor}"`
 
-            compara_objeto.push(new comparacoes(str_objeto, str_objeto_partes[0], str_objeto_partes[1], str_objeto_valor));
+            console.log(`STR_OBJETO: ${str_objeto}\nSTR_OBJECTO_VALOR: ${str_objeto_valor}`)
+            //if (str_objeto_valor!=undefined) txtstr = txtstr.replace(str_objeto, str_objeto_valor);
+            txtstr = txtstr.replace(str_objeto, str_objeto_valor);
         }
 
-        for (let i = 0; i < compara_objeto.length; i++) {
-            txtstr = txtstr.replace(compara_objeto[i].expressao, compara_objeto[i].valor);
-        }
+        // for (let i = 0; i < compara_objeto.length; i++) {
+        //     txtstr = txtstr.replace(compara_objeto[i].expressao, compara_objeto[i].valor);
+        // }
+        //console.log(`TEXTO FINAL: ${txtstr}`);
 
         return txtstr;
     };

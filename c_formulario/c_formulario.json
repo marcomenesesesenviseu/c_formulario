@@ -1,7 +1,7 @@
 {
     "_projeto" : "C_FORMULÁRIO - Validador de formulários",
     "_autor" : "Desenvolvido por Marco Meneses (EMES3SOFT)",
-    "_versao" : "1.2",
+    "_versao" : "1.3",
     "tempo_de_espera" : 3500,
     "tipos_mensagens": [
         [0, "Erro", "danger", "<i class='fa-solid fa-circle-xmark me-3'></i>"],
