@@ -33,7 +33,10 @@ Consegue fazer testes:
   - se é ou não um email válido (email, valemail)
   - pode utilizar o operador **||** (ou) ou **&&** (e) para testar mais do que um elemento do formulário na mesma validação
   - pode efetuar pedidos de dados a uma base de dados através de liguagens de programação de servidor (PHP, Python, ...) através da definição do link e da passagem dos dados (data_address) **(NEW)**
+    - Estrutura: data_address((<ligação ao ficheiro>;;<dados enviados para a ligação com a configuração de dicionário>)) **(NEW)**
+    - Dicionário em javascript do tipo JSON é {"<nome da variável 1>": "<valor da variável 1>", "<nome da variável 2>": "<valor da variável 2>", ...} **(NEW)**
   - pode efetuar pedidos de dados a uma base de dados através de liguagens de programação de servidor (PHP, Python, ...) através da definição do link e do id do formulário (form_address) **(NEW)**
+    - Estrutura: form_address((<ligação ao ficheiro>;;<id do formulário>)) **(NEW)**
 
 # Associar formulário
 
@@ -45,7 +48,7 @@ Linha para criar a associação do formulário:
 # Associar validações
 
 Linha para associar validações ao formulário:
-- Função Adiciona_Validacoes(id do objeto onde colocar o erro, condição ou condições a testar, texto a escrever caso a condição se verifique) funciona com a entrada de um vetor de 3 elementos **UPDATE**
+- Função Adiciona_Validacoes(<id do objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos **UPDATE**
   - id do objeto html
     - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
   - condição (comparação)
