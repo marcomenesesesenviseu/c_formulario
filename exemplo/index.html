@@ -1,3 +1,5 @@
+<!-- Exemplo da aplicação do C_FORMULÁRIO - Validador de formulários -->
+
 <!DOCTYPE html>
 <html lang="pt">
     <head>
@@ -10,28 +12,28 @@
     
     <body>
         <form id="frmLogin" class="col-xxl-6 col-lg-8 col-sm-10 mx-auto">
-            <div>
-                <label>Utilizador</label>
-                <input id="txtUtilizador" class="form-control" type="text" />
-                <!-- <div class="esconde_c_formulario erro_c_formulario" id="erro_txtUtilizador"></div> -->
+            <div  class="form-floating">
+                <input id="txtUtilizador" class="form-control" type="text" placeholder="?" autofocus />
+                <label for="txtUtilizador">Utilizador</label>
             </div>
             <br/>
-            <div>
+            <div class="form-floating">
+                <input id="txtPalavraPasse" class="form-control" type="password" placeholder="?" />
                 <label>Palavra-Passe</label>
-                <input id="txtPalavraPasse" class="form-control" type="password" />
-                <!-- <div class="esconde_c_formulario erro_c_formulario" id="erro_txtPalavraPasse"></div> -->
             </div>
             <br/>
-            <div>
+            <div class="form-check">
                 <input id="chkPolitica" class="form-check-input" type="checkbox" />
-                <label>Concordo com as políticas do site</label>
-                <!-- <div class="esconde_c_formulario erro_c_formulario" id="erro_chkPolitica"></div> -->
+                <label for="chkPolitica">Concordo com as políticas do site</label>
             </div>
             <br/>
             <br/>
             <button id="butValidar" class="btn btn-primary" type="submit">Validar</button>
+            <button id="butLimpar" class="btn btn-danger float-end" type="button">Limpar</button>
         </form>
-        
+
+        <div class="position-fixed bottom-0 end-0 p-3" id="toast-container"></div>
+
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
         <script src="../c_formulario/b5toast.js"></script>
