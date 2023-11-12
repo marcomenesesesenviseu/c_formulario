@@ -39,7 +39,7 @@ Consegue fazer testes:
 
 Linha para criar a associação do formulário:
 - const <variável_para_o_formulário> = new c_formulario(<id_do_formulário>, *<ligação para o ficheiro json de erros personalizado>); **(UPDATE)**
-  - * não obrigatório **(NEW)**
+  - *não obrigatório **(NEW)**
   - Ainda não funcional (possivelmente disponível na próxima versão) **(NEW)**
 
 # Associar validações
