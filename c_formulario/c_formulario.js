@@ -111,7 +111,6 @@ class c_formulario {
         this.msgs.ficheiro = this.caminho + constantes.nome_ficheiro_json;
         this.msgs.existe = this.#fich_json_existe(this.msgs.ficheiro);
         this.msgs.tempo_de_espera =  this.#fich_json_existe() ? this.#ler_ficheiro_c_formulario("tempo_de_espera") : constantes.tempo_espera;
-        // alert('Construtor\nFicheiro: ' + this.msgs.ficheiro + "\nFicheiro existe: " + this.msgs.existe + "\nTempo de espera: " + this.msgs.tempo_de_espera);
 
         this.nome = id;
         this.id = this.#Verifica_String_SubString(id,'#') ? id : "#" + id;
@@ -124,7 +123,6 @@ class c_formulario {
         this.formulario.num_elementos = this.formulario.elementos.length;
         this.formulario.objetos = [];
         this.formulario.ficheiro_mensagens = (ficheiro_json_mensagens_personalizadas != undefined && this.#fich_json_existe(ficheiro_json_mensagens_personalizadas)) ? this.ficheiro_mensagens : ficheiro_json_mensagens_personalizadas;
-        // alert('Construtor\n ' + JSON.stringify(this.formulario));
 
         if (this.formulario.is("form")) {
             this.#RecolherElementos();
@@ -160,6 +158,7 @@ class c_formulario {
         return str.indexOf(substr);
     }
 
+    // Devolve a diretoria on se encontra o script do c_formulario
     #Devolve_Diretoria_Local() {
         let diretoria = undefined;
 
@@ -188,9 +187,6 @@ class c_formulario {
                 devolve = true;
             }
         });
-        
-        // let dado = devolve;
-        //alert(`Ficheiro: ${this.#Devolve_Diretoria_Local()} -- ${this.msgs.ficheiro}\nDevolve: ${JSON.stringify(devolve)}`);
 
         return devolve;
     }
@@ -203,8 +199,6 @@ class c_formulario {
             console.error("O ficheiro json de mensagens não existe: " + this.msgs.ficheiro);
             return -2;
         }
-        // else
-        //     console.log("O ficheiro json: " + this.msgs.ficheiro);
 
         dado = $.ajax({
             type: "GET",
@@ -230,8 +224,6 @@ class c_formulario {
         }
 
         if (pos > -1) resp = dado.responseJSON[nome_dado][pos];
-    
-        // console.log(resp);
     
         return resp;
     }
@@ -377,11 +369,8 @@ class c_formulario {
         if (num_ou_nome_objeto.includes("?")) {
             encontrou_pos = this.formulario.vetores.id.filter(str => str.includes(num_ou_nome_objeto.replace("?",""))).length - 1;
             if (encontrou_pos > -1) {
-                // $.each(this.formulario.vetores.id, function(index) { if (this.includes(num_ou_nome_objeto.replace("?",""))) { encontrou_pos = index; return false;}});
                 encontrou_pos = this.#Existe_Valor_Vetor(this.formulario.vetores.id.filter(str => str.includes(num_ou_nome_objeto.replace("?","")))[0],this.formulario.vetores.id);
             }
-            // alert(this.formulario.vetores.id.filter(str => str.includes(num_ou_nome_objeto.replace("?","")))[0]);
-            // alert(`Objeto: ${num_ou_nome_objeto}\nNº de objetos encontrados: ${num_elementos}\nPosição no array: ${encontrou_pos}`)
         }
         else {
             encontrou_pos = this.#Existe_Valor_Vetor(num_ou_nome_objeto,this.formulario.vetores.num);
@@ -456,13 +445,11 @@ class c_formulario {
 
     // Através de um endereço e de dados que este necessite, efetuar uma devolução de valores
     #Pedido_Valores($ligacao = undefined, $dados = undefined) {
-        console.log(`PEDIDO__VALORES: ${$ligacao} -- ${$dados}`)
-
         if ($ligacao == undefined || $dados == undefined)
             return undefined;
         
         let $devolve = undefined;
-        console.log(`PEDIDO__VALORES: ${$dados}`)
+        
         // Make an AJAX request to the server to add the new category
         $.ajax({
             url: $ligacao,
@@ -477,7 +464,6 @@ class c_formulario {
             }
         });
 
-        console.log(`DEVOLVE: ${$devolve}`);
         return $devolve;
     }
 
@@ -487,10 +473,6 @@ class c_formulario {
 
         // Get the form data
         let $formData = $(this.id).serialize();
-        // if ($("#" + $nome_formulario).is("form")) //$nome_formulario != "")
-        //     $formData = $(this.id).serialize();
-        // else
-        //     return -2;
 
         // Make an AJAX request to the server to add the new category
         $.ajax({
@@ -510,19 +492,15 @@ class c_formulario {
     }
 
     #Devolve_posicao_limitadores(texto_a_verificar, inicio_em = 0, incluir_limitadores = true) {
-        //let inicio = texto_a_verificar.indexOf(limitadores.valores_inicial, inicio_em);
         let posicoes_limitadores = [-1,-1];
         let cont_limitadores = [0,0];
 
-        //console.log(`Texto a verificar: ${texto_a_verificar}`);
         inicio_em = texto_a_verificar.indexOf(limitadores.inicial, inicio_em);
 
         if (inicio_em == -1) 
             return posicoes_limitadores;
 
-        //alert(`Posição: ${inicio_em} -- Tamanho texto: ${texto_a_verificar.length}`);
         for (let posicoes = inicio_em; posicoes <= texto_a_verificar.length; ++posicoes) {
-            //alert(`CONTA LIMITADORES: ${cont_limitadores.toString()}`);
             if (texto_a_verificar[posicoes] == limitadores.inicial) {
                 cont_limitadores[0]++;
                 posicoes_limitadores[0] = posicoes + (incluir_limitadores ? 0 : 1);
@@ -536,22 +514,12 @@ class c_formulario {
         return posicoes_limitadores;
     }
 
-    // Conta o nº de limitadores
-    #Devolve_Valor_Texto() {
-
-    }
-
     // Elabora o texto final de comparação com a substituição dos objetos pelos seus valores
     #Texto_Final(texto_comparacao, inicio = 0) {
         let txtstr = texto_comparacao;
-        //let compara_objeto = [];
         let conta_repeticoes = 0;
-        // const emailRegex =/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 
-        //console.log(`Texto_Comparação: ${texto_comparacao}\nPosição do limitador inicial: ${txtstr.indexOf(limitadores.inicial, inicio)}`);
         while (txtstr.indexOf(limitadores.inicial, inicio) != -1) {
-            // console.log(`Repetições: ${++conta_repeticoes}`);
-            
             if (++conta_repeticoes > 3) break;
 
             let posicoes = this.#Devolve_posicao_limitadores(txtstr, inicio);
@@ -661,14 +629,8 @@ class c_formulario {
                 str_objeto_valor = `"${str_objeto_valor}"`
 
             console.log(`STR_OBJETO: ${str_objeto}\nSTR_OBJECTO_VALOR: ${str_objeto_valor}`)
-            //if (str_objeto_valor!=undefined) txtstr = txtstr.replace(str_objeto, str_objeto_valor);
             txtstr = txtstr.replace(str_objeto, str_objeto_valor);
         }
-
-        // for (let i = 0; i < compara_objeto.length; i++) {
-        //     txtstr = txtstr.replace(compara_objeto[i].expressao, compara_objeto[i].valor);
-        // }
-        //console.log(`TEXTO FINAL: ${txtstr}`);
 
         return txtstr;
     };
@@ -839,19 +801,11 @@ class c_formulario {
             }
         }
 
-        // if (existe_erros) {
-        //     const tooltip_c_formulario_TriggerList = document.querySelectorAll('[data-bs-toggle="tooltip_c_formulario"]');
-        //     const tooltipList = [...tooltip_c_formulario_TriggerList].map(tooltip_c_formulario_Trigger_ => new bootstrap.Tooltip(tooltip_c_formulario_Trigger_));
-        // }
-
         return existe_erros;
     }
 
     // Limpar as validações do formulário
     Limpar_Validacoes(reset_formulario = true) {
-        // this.elementos.each(function() {
-        //     this.Validar_Caixa_Erro("#" + $(this).id, 0);
-        // });	
         this.#Limpar_Caixa_Erro();
         
         if (reset_formulario)
