@@ -4,15 +4,15 @@ Módulo JavaScript para criar formulários com validação dinâmica. <br>
 Atualizada em **12/11/2023**
 
 5 ficheiros contituem o módulo
-- atributos.js **UPDATE**
-- b5toast.js **UPDATE**
+- atributos.js **(UPDATE)**
+- b5toast.js **(UPDATE)**
 - c_formulario.css
 - c_formulario.json
 - c_formulario.js
 
 Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. <br>
 Ainda estou a trabalhar para melhorar o código. <br>
-Esta já é uma versão quase terminada, mas ainda com funcionalidades a serem preparadas. <br> **UPDATE**
+Esta já é uma versão quase terminada, mas ainda com funcionalidades a serem preparadas. <br> **(UPDATE)**
 Caso detetem algum problema, enviem email para emes3soft@gmail.com com a descrição o mais detalhada possível. <br>
 
 # Outros módulos necessários
@@ -38,7 +38,9 @@ Consegue fazer testes:
 # Associar formulário
 
 Linha para criar a associação do formulário:
-- const <variável_para_o_formulário> = new c_formulario(<id_do_formulário>);
+- const <variável_para_o_formulário> = new c_formulario(<id_do_formulário>, *<ligação para o ficheiro json de erros personalizado>); **(UPDATE)**
+  - * não obrigatório **(NEW)**
+  - Ainda não funcional (possivelmente disponível na próxima versão) **(NEW)**
 
 # Associar validações
 
@@ -63,7 +65,7 @@ Linha para associar validações ao formulário:
     - caso necessite testar a inclusão de texto (indexof(texto))
       - Exemplo: "«txtUtilizador.indexof('abc') > -1»"
     - caso necessite testar um grupo de objetos
-      - Exemplo: f_Login.Adiciona_Validacoes(["chkTipo_?", "«chkTipo_?.length» == 0", "* Tem de assinalar pelo menos uma das opções!"]); **UPDATE**
+      - Exemplo: f_Login.Adiciona_Validacoes(["chkTipo_?", "«chkTipo_?.length» == 0", "* Tem de assinalar pelo menos uma das opções!"]); **(UPDATE)**
     - caso necessite de validar um campo de email ou correio eletrónico
       - Exemplo: "!«txtUtillizador.email»" ou "!«txtUtilizador.valEmail»"
     - caso necessite de pedido de valores a uma base de dados através da passagem de valores  **(NEW)**
@@ -74,7 +76,7 @@ Linha para associar validações ao formulário:
       - **NOTA:** Aqui pode utilizar a acentuação grave (`) ou as plicas (') ou as aspas (") para delimitar a(s) condição(ões), pois não existem valores a passar para o form_address (recomendo a acentuação grave) **(NEW)**
   - texto de erro a apresentar
     - para que o texto do erro apareça a condição tem de se verificar, ou seja, ser verdadeira
-    - não existe a necessidade de criar <div> para o erro, pois é criada automaticamente caso a(s) condição(ões) do erro se verifiquem (condição verdadeira) **UPDATE**
+    - não existe a necessidade de criar <div> para o erro, pois é criada automaticamente caso a(s) condição(ões) do erro se verifiquem (condição verdadeira) **(UPDATE)**
     - contudo, pode criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer
       - id deve começar por erro_<nome_do_objeto> 
       - devem ser-lhe atribuídas as classes
