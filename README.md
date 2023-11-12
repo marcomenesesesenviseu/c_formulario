@@ -24,7 +24,7 @@ bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/ <br>
 # Validações desta última versão
 
 Consegue fazer testes:
-  - ao conteúdo (val, value) (deixou de ser usado só o nome do objeto) **UPDATE**
+  - ao conteúdo (val, value) (deixou de ser usado só o nome do objeto para devolver o valor) **UPDATE**
   - ao tamanho (length, len)
   - se um caixa de verificação está ou não marcada (checked, check), devolvendo true se estiver marcada ou false caso não esteja marcada
   - à inclusão de texto (includes(texto)), devolvendo true caso exista o texto ou false caso não exista
@@ -48,7 +48,7 @@ Linha para criar a associação do formulário:
 # Associar validações
 
 Linha para associar validações ao formulário:
-- Função Adiciona_Validacoes(id do objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos **UPDATE**
+- Função Adiciona_Validacoes(<<id do objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos **UPDATE**
   - id do objeto html
     - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
   - condição (comparação)
