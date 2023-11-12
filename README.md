@@ -48,7 +48,7 @@ Linha para criar a associação do formulário:
 # Associar validações
 
 Linha para associar validações ao formulário:
-- Função Adiciona_Validacoes(<o id do objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos **UPDATE**
+- Função Adiciona_Validacoes(id do objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos **UPDATE**
   - id do objeto html
     - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
   - condição (comparação)
