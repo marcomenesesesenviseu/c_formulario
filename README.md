@@ -26,9 +26,9 @@ bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/ <br>
 Consegue fazer testes:
   - ao conteúdo (val, value)
   - ao tamanho (length, len)
-  - à complexidade do texto (passe, complexaty), muito útil para as palavras-passe ** NEW **
-  - se um ip é válido (ip, valip) ** NEW **
-  - se um url é válido (url, valurl) ** NEW **
+  - à complexidade do texto (passe, complexaty), muito útil para as palavras-passe **(NEW)**
+  - se um ip é válido (ip, valip) **(NEW)**
+  - se um url é válido (url, valurl) **(NEW)**
   - se um caixa de verificação está ou não marcada (checked, check), devolvendo true se estiver marcada ou false caso não esteja marcada
   - à inclusão de texto (includes(texto)), devolvendo true caso exista o texto ou false caso não exista
   - à inclusão de texto (indexof(texto)), devolvendo a posição do texto a procurar no value da tag, caso não encontre devolve -1
@@ -64,11 +64,11 @@ Linha para associar validações ao formulário:
       - Exemplo: "«txtUtilizador.val» == ''" ou "«txtUtilizador.value» == ''"
     - caso necessite de testar o comprimento do valor de um objeto
       - Exemplo: "«txtPalavraPasse.length» < 10" ou "«txtPalavraPasse.len» < 10"
-    - caso necessite de testar a complexidade do texto do objeto ** NEW **
+    - caso necessite de testar a complexidade do texto do objeto **(NEW)**
       - Exemplo: "!«txtPalavraPasse.passe»" ou "!«txtPalavraPasse.complexity»"
-    - caso necessite de testar se o texto do objeto corresponde a um ip válido ** NEW **
+    - caso necessite de testar se o texto do objeto corresponde a um ip válido **(NEW)**
       - Exemplo: "!«txtIP.ip»" ou "!«txtIP.valip»"
-    - caso necessite de testar se o texto do objeto corresponde a um url válido ** NEW **
+    - caso necessite de testar se o texto do objeto corresponde a um url válido **(NEW)**
       - Exemplo: "!«txtUrl.url»" ou "!«txtPalavraPasse.valurl»"
     - caso necessite testar a marcação de uma caixa de verificação
       - Exemplo: "«txtUtilizador.checked»" ou "«txtUtilizador.checked» == true" ou "!«txtUtilizador.checked»" ou "«txtUtilizador.checked == false»"
