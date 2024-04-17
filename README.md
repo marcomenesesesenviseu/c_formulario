@@ -51,35 +51,41 @@ Linha para criar a associação do formulário:
 # Associar validações
 
 Linha para associar validações ao formulário:
-- Função Adiciona_Validacoes(<id_do_objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos **UPDATE**
+- Função Adiciona_Validacoes(<id_do_objeto onde colocar o erro>, <condição ou condições a testar>, <texto a escrever caso a condição se verifique>) funciona com a entrada de um vetor de 3 elementos
   - id do objeto html
     - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
-  - condição (comparação)
+  - condição ou condições (comparação)
     - caso se queira referir a um objeto html, deve colocar o seu id entre « e »
       - ao referir-se a um grupo de elementos deve colocar na tag o carater _?_, para saber que a tag engloba um conjunto de outras tags
     - deve ter um operador condicional (<, >, ==, <=, >=, !=, !==, ===, !)
-      - se usar o _includes_ ou o _email_ não necessita de comparação, pois sairá um valor _true_ ou _false_ **(UPDATE)**
+      - se usar o _includes_, _email_, _ip_, _url_ ou _passe_ não necessita de comparação, pois sairá um valor _true_ ou _false_ **(UPDATE)**
     - pode inserir valores para a comparação, colocando-os diretamente como faz numa qualquer comparação em javascript
     - a sua totalidade deve ficar entre aspas
       - Exemplo: "«txtUtilizador.val» == ''" ou "«txtUtilizador.value» == ''"
     - caso necessite de testar o comprimento do valor de um objeto
       - Exemplo: "«txtPalavraPasse.length» < 10" ou "«txtPalavraPasse.len» < 10"
-    - caso necessite testar a marcação de uma caixa de verificação **
+    - caso necessite de testar a complexidade do texto do objeto ** NEW **
+      - Exemplo: "!«txtPalavraPasse.passe»" ou "!«txtPalavraPasse.complexity»"
+    - caso necessite de testar se o texto do objeto corresponde a um ip válido ** NEW **
+      - Exemplo: "!«txtIP.ip»" ou "!«txtIP.valip»"
+    - caso necessite de testar se o texto do objeto corresponde a um url válido ** NEW **
+      - Exemplo: "!«txtUrl.url»" ou "!«txtPalavraPasse.valurl»"
+    - caso necessite testar a marcação de uma caixa de verificação
       - Exemplo: "«txtUtilizador.checked»" ou "«txtUtilizador.checked» == true" ou "!«txtUtilizador.checked»" ou "«txtUtilizador.checked == false»"
     - caso necessite testar a inclusão de texto (includes(texto))
       - Exemplo: "«txtUtilizador.includes('abc')»" ou "!«txtUtilizador.includes('abc')»"
     - caso necessite testar a inclusão de texto (indexof(texto))
       - Exemplo: "«txtUtilizador.indexof('abc') > -1»"
     - caso necessite testar um grupo de objetos
-      - Exemplo: f_Login.Adiciona_Validacoes(["chkTipo_?", "«chkTipo_?.length» == 0", "* Tem de assinalar pelo menos uma das opções!"]); **(UPDATE)**
+      - Exemplo: f_Login.Adiciona_Validacoes(["chkTipo_?", "«chkTipo_?.length» == 0", "* Tem de assinalar pelo menos uma das opções!"]);
     - caso necessite de validar um campo de email ou correio eletrónico
       - Exemplo: "!«txtUtillizador.email»" ou "!«txtUtilizador.valEmail»"
-    - caso necessite de pedido de valores a uma base de dados através da passagem de valores  **(NEW)**
-      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«data_address((**/pedidos/dados.php**;;**{"txtUtil": «txtUtil.val», "txtPasse": «txtPasse.val»}**))» != 1`, "* Utilizador ou palavra-passe inválidos"]);  **(NEW)**
-      - **NOTA:** Deve utilizar a acentuação grave (`) ou as plicas (') para delimitar a(s) condição(ões), pois os valores a passar para o data_address necessitam de estar dentro de aspas (") e não de plicas (') (recomendo a acentuação grave) **(NEW)**
-    - caso necessite de pedido de valores a uma base de dados através da passagem de todos os dados de um formulário **(NEW)**
-      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«form_address((**/pedidos/dados.php**;;**frmEntrada**))» != 1`, "* Utilizador ou palavra-passe inválidos"]); **(NEW)**
-      - **NOTA:** Aqui pode utilizar a acentuação grave (`) ou as plicas (') ou as aspas (") para delimitar a(s) condição(ões), pois não existem valores a passar para o form_address (recomendo a acentuação grave) **(NEW)**
+    - caso necessite de pedido de valores a uma base de dados através da passagem de valores
+      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«data_address((**/pedidos/dados.php**;;**{"txtUtil": «txtUtil.val», "txtPasse": «txtPasse.val»}**))» != 1`, "* Utilizador ou palavra-passe inválidos"]);
+      - **NOTA:** Deve utilizar a acentuação grave (`) ou as plicas (') para delimitar a(s) condição(ões), pois os valores a passar para o data_address necessitam de estar dentro de aspas (") e não de plicas (') (recomendo a acentuação grave)
+    - caso necessite de pedido de valores a uma base de dados através da passagem de todos os dados de um formulário
+      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«form_address((**/pedidos/dados.php**;;**frmEntrada**))» != 1`, "* Utilizador ou palavra-passe inválidos"]);
+      - **NOTA:** Aqui pode utilizar a acentuação grave (`) ou as plicas (') ou as aspas (") para delimitar a(s) condição(ões), pois não existem valores a passar para o form_address (recomendo a acentuação grave)
   - texto de erro a apresentar
     - para que o texto do erro apareça a condição tem de se verificar, ou seja, ser verdadeira
     - não existe a necessidade de criar <div> para o erro, pois é criada automaticamente caso a(s) condição(ões) do erro se verifiquem (condição verdadeira) **(UPDATE)**
