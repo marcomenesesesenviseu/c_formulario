@@ -80,15 +80,15 @@ Linha para associar validações ao formulário:
       - Exemplo: f_Login.Adiciona_Validacoes(["chkTipo_?", "«chkTipo_?.length» == 0", "* Tem de assinalar pelo menos uma das opções!"]);
     - caso necessite de validar um campo de email ou correio eletrónico
       - Exemplo: "!«txtUtillizador.email»" ou "!«txtUtilizador.valEmail»"
-    - caso necessite de pedido de valores a uma base de dados através da passagem de valores
-      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«data_address((**/pedidos/dados.php**;;**{"txtUtil": «txtUtil.val», "txtPasse": «txtPasse.val»}**))» != 1`, "* Utilizador ou palavra-passe inválidos"]);
+    - caso necessite de pedido de valores a uma base de dados através da passagem de valores **(UPDATE)**
+      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«data_address((/pedidos/dados.php;;{"txtUtil": «txtUtil.val», "txtPasse": «txtPasse.val»}))» != 1`, "* Utilizador ou palavra-passe inválidos"]);
       - **NOTA:** Deve utilizar a acentuação grave (`) ou as plicas (') para delimitar a(s) condição(ões), pois os valores a passar para o data_address necessitam de estar dentro de aspas (") e não de plicas (') (recomendo a acentuação grave)
-    - caso necessite de pedido de valores a uma base de dados através da passagem de todos os dados de um formulário
-      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«form_address((**/pedidos/dados.php**;;**frmEntrada**))» != 1`, "* Utilizador ou palavra-passe inválidos"]);
+    - caso necessite de pedido de valores a uma base de dados através da passagem de todos os dados de um formulário  **(UPDATE)**
+      - Exemplo: f_Login.Adiciona_Validacoes(["txtPasse",`«form_address((/pedidos/dados.php;;frmEntrada))» != 1`, "* Utilizador ou palavra-passe inválidos"]);
       - **NOTA:** Aqui pode utilizar a acentuação grave (`) ou as plicas (') ou as aspas (") para delimitar a(s) condição(ões), pois não existem valores a passar para o form_address (recomendo a acentuação grave)
   - texto de erro a apresentar
     - para que o texto do erro apareça a condição tem de se verificar, ou seja, ser verdadeira
-    - não existe a necessidade de criar <div> para o erro, pois é criada automaticamente caso a(s) condição(ões) do erro se verifiquem (condição verdadeira) **(UPDATE)**
+    - não existe a necessidade de criar <div> para o erro, pois é criada automaticamente caso a(s) condição(ões) do erro se verifiquem (condição verdadeira)
     - contudo, pode criar um div no formulário por cada objeto html de entrada de dados, para que o erro possa a aparecer
       - id deve começar por erro_<nome_do_objeto> 
       - devem ser-lhe atribuídas as classes
