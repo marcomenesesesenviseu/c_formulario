@@ -1,18 +1,18 @@
 # c_formulario
 Módulo JavaScript para criar formulários com validação dinâmica. <br>
-Última versão: 1.3 <br>
-Atualizada em **12/11/2023**
+Última versão: 1.6 <br>
+Atualizada em **17/04/2024**
 
 5 ficheiros contituem o módulo
-- atributos.js **(UPDATE)**
-- b5toast.js **(UPDATE)**
+- atributos.js (não é mais necessário) **(UPDATE)**
+- b5toast.js
 - c_formulario.css
 - c_formulario.json
 - c_formulario.js
 
 Desenvolvido para ser código aberto por forma a qualquer pessoa poder acresentar ou alterar funcionalidades. <br>
 Ainda estou a trabalhar para melhorar o código. <br>
-Esta já é uma versão quase terminada, mas ainda com funcionalidades a serem preparadas. <br> **(UPDATE)**
+Esta já é uma versão terminada, mas com várias funcionalidades a serem incremendadas. <br> **(UPDATE)**
 Caso detetem algum problema, enviem email para emes3soft@gmail.com com a descrição o mais detalhada possível. <br>
 
 # Outros módulos necessários
@@ -24,26 +24,29 @@ bootstrap  https://getbootstrap.com/docs/5.3/getting-started/download/ <br>
 # Validações desta última versão
 
 Consegue fazer testes:
-  - ao conteúdo (val, value) (deixou de ser usado só o nome do objeto para devolver o valor) **UPDATE**
+  - ao conteúdo (val, value)
   - ao tamanho (length, len)
+  - à complexidade do texto (passe, complexaty), muito útil para as palavras-passe ** NEW **
+  - se um ip é válido (ip, valip) ** NEW **
+  - se um url é válido (url, valurl) ** NEW **
   - se um caixa de verificação está ou não marcada (checked, check), devolvendo true se estiver marcada ou false caso não esteja marcada
   - à inclusão de texto (includes(texto)), devolvendo true caso exista o texto ou false caso não exista
   - à inclusão de texto (indexof(texto)), devolvendo a posição do texto a procurar no value da tag, caso não encontre devolve -1
   - teste a um grupo de objetos (só funciona o len e só avalia checkboxs) < _ainda em teste_ >
   - se é ou não um email válido (email, valemail)
   - pode utilizar o operador **||** (ou) ou **&&** (e) para testar mais do que um elemento do formulário na mesma validação
-  - pode efetuar pedidos de dados a uma base de dados através de liguagens de programação de servidor (PHP, Python, ...) através da definição do link e da passagem dos dados (data_address) **(NEW)**
-    - Estrutura: data_address((<ligação ao ficheiro>;;<dados enviados para a ligação com a configuração de dicionário>)) **(NEW)**
-    - Dicionário em javascript do tipo JSON é {"<nome da variável 1>": "<valor da variável 1>", "<nome da variável 2>": "<valor da variável 2>", ...} **(NEW)**
-  - pode efetuar pedidos de dados a uma base de dados através de liguagens de programação de servidor (PHP, Python, ...) através da definição do link e do id do formulário (form_address) **(NEW)**
-    - Estrutura: form_address((<ligação ao ficheiro>;;<id do formulário>)) **(NEW)**
+  - pode efetuar pedidos de dados a uma base de dados através de liguagens de programação de servidor (PHP, Python, ...) através da definição do link e da passagem dos dados (data_address)
+    - Estrutura: data_address((<ligação ao ficheiro>;;<dados enviados para a ligação com a configuração de dicionário>))
+    - Dicionário em javascript do tipo JSON é {"<nome da variável 1>": "<valor da variável 1>", "<nome da variável 2>": "<valor da variável 2>", ...}
+  - pode efetuar pedidos de dados a uma base de dados através de liguagens de programação de servidor (PHP, Python, ...) através da definição do link e do id do formulário (form_address)
+    - Estrutura: form_address((<ligação ao ficheiro>;;<id do formulário>))
 
 # Associar formulário
 
 Linha para criar a associação do formulário:
-- const <variável_para_o_formulário> = new c_formulario(<id_do_formulário>, *<ligação para o ficheiro json de erros personalizado>); **(UPDATE)**
-  - *não obrigatório **(NEW)**
-  - Ainda não funcional (possivelmente disponível na próxima versão) **(NEW)**
+- const <variável_para_o_formulário> = new c_formulario(<id_do_formulário>, *<ligação para o ficheiro json de erros personalizado>);
+  - * não obrigatório
+  - Ainda não funcional (possivelmente disponível na próxima versão)
 
 # Associar validações
 
